@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es-PE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ingreso de requerimientos &mdash; LIVES</title>
+<style>
+:root{ --petrol:#0E3B36; --sage:#0F7A5A; --warm-light:#F1F6F4; --stone:#5F726C; }
+html,body{height:100%;}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--warm-light);color:#333;
+font-family:Calibri,Arial,sans-serif;font-size:14px;line-height:1.45;overflow:hidden;}
+
+/* Mensaje de respaldo: solo se ve si el sistema no llega a cargar. */
+.fallback{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+padding:24px;text-align:center;z-index:0;}
+.fallback .box{max-width:440px;}
+.fallback h1{font-size:17px;color:var(--petrol);margin:0 0 8px;}
+.fallback p{font-size:13.5px;color:var(--stone);margin:0 0 16px;}
+.fallback a{display:inline-block;background:var(--sage);color:#fff;text-decoration:none;
+font-weight:700;font-size:14px;border-radius:8px;padding:11px 20px;}
+
+iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff;z-index:1;}
+</style>
+</head>
+<body>
+
+<div class="fallback">
+  <div class="box">
+    <h1>Ingreso de requerimientos</h1>
+    <p>El sistema no se pudo mostrar aqu&iacute;. Suele pasar cuando el navegador
+    tiene varias cuentas de Google abiertas a la vez.</p>
+    <a href="https://script.google.com/macros/s/AKfycbwLflXSE_-7laYbgZNctPRabnMJBcR_gYyOJDS3ijHCWWqfHZawZivI-ZeWVmy0HhSz/exec" target="_blank" rel="noopener">Abrir en una pesta&ntilde;a nueva</a>
+  </div>
+</div>
+
+<iframe src="https://script.google.com/macros/s/AKfycbwLflXSE_-7laYbgZNctPRabnMJBcR_gYyOJDS3ijHCWWqfHZawZivI-ZeWVmy0HhSz/exec" title="Ingreso de requerimientos"></iframe>
+
+</body>
+</html>
