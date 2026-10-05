@@ -848,7 +848,7 @@
 
 <script>
 /* =========================================================================
-   WIP MUESTRAS EN SUPABASE                                   wip-sb 1 · 30/09/2026
+   WIP MUESTRAS EN SUPABASE                                   wip-sb 2 · 05/10/2026
    Reemplaza a google.script.run. La pantalla de José no cambia: sigue
    llamando getPorEntregar, getFicha, registrar, etc., y aquí cada una:
      - las lecturas se arman en el navegador con los datos de wm_datos,
@@ -1231,6 +1231,10 @@
         if (!o.fase) pr.push('sin fase');
         if (existen[_norm(o.orden)]) pr.push('el ORDEN ' + o.orden + ' YA EXISTE');
         if (enLote[_norm(o.orden)]) pr.push('ORDEN repetido dentro de este pegado');
+        /* Errores de fórmula copiados del Excel (#N/A, #ERROR!...): esa fila no se graba */
+        var rotos = [];
+        o.crudo.forEach(function(v, j){ if (/^#(N\/A|ERROR!?|REF!|VALUE!|DIV\/0!|NAME\?|NUM!|NULL!|SPILL!|CALC!)/i.test(String(v).trim())) rotos.push(COLS_PEGADO[j] || ('columna ' + (j + 1))); });
+        if (rotos.length) pr.push('trae errores del Excel (#N/A) en ' + rotos.join(', ') + ': NO se va a grabar, corrigelo en el Excel y vuelve a pegarla');
         enLote[_norm(o.orden)] = true;
         o.alerta = pr.join(' · ');
         if (o.alerta) avisos.push('Fila ' + (r + 1) + ': ' + o.alerta);
@@ -1497,7 +1501,7 @@ var AREA = (new URLSearchParams(location.search).get('area') || '').toLowerCase(
 /* Marca del archivo, para saber si lo que corre es lo ultimo que se
    entrego. No se muestra en pantalla: se consulta escribiendo VERSION
    en la consola del navegador (F12 -> Consola). */
-var VERSION = 'build 29sep-1 / supabase-1';
+var VERSION = 'build 29sep-1 / supabase-2';
 
 var usuario = '', PREVIEW = null;
 var PE = { filas:[], semana:'TODAS', status:'TODOS', tope:0, hora:'' };
