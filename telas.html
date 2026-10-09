@@ -608,7 +608,7 @@ details.help b{color:#333;}
 
   <!-- ==================== MENÚ ==================== -->
   <div class="scr on" id="s-menu">
-    <div class="menu" id="menu">
+    <div class="menu" id="menu" style="visibility:hidden">
       <button class="mbtn a" id="mbIng" onclick="ir('ingreso')">
         <div class="top"></div>
         <div class="in">
@@ -1027,6 +1027,7 @@ function cargar(){
 }
 
 function aplicarRol(){
+  $('menu').style.visibility = '';   // el menu se ve recien cuando se sabe el rol (sin parpadeo)
   var w = $('who');
   w.textContent = ROL==='DESARROLLO' ? 'Desarrollo' : ROL==='CORTE' ? 'Corte' : 'Solo consulta';
   w.className = 'who' + (ROL==='CORTE' ? ' corte' : ROL==='VER' ? ' ver' : '');
@@ -1044,6 +1045,7 @@ function aplicarRol(){
 }
 
 function sinConexion(texto){
+  $('menu').style.visibility = '';
   $('st').textContent = 'Sin conexión con la base';
   $('hEstado').textContent = 'Sin conexión';
   msg('msgGen', 'err', '<b>No se pudo leer el inventario.</b> ' + esc(texto) + ' Toca <b>Actualizar</b> para volver a intentar.');

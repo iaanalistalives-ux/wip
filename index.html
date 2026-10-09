@@ -835,7 +835,10 @@
 <div class="wrap">
 
   <!-- ============================ MENU ============================ -->
-  <div id="pMenu">
+  <!-- El menu se muestra cuando la base dice que puede hacer cada persona; antes solo "Cargando..."
+       (asi no aparecen un momento las opciones de otra area). -->
+  <div id="pCargando" class="cargando">Cargando...</div>
+  <div id="pMenu" style="display:none">
     <div class="rejilla">
       <button class="tarjeta" onclick="abrir('ingreso')">
         <div class="n">Ingresar<br>requerimiento</div>
@@ -1711,7 +1714,7 @@ function irMenu(){
   titulo('WIP MUESTRAS','Planta Barranco');
 }
 function ocultarTodo(){
-  ['pMenu','pIngreso','pDesarrollo','pEntregar','pBuscar','pArea','pMenuArea'].forEach(function(id){
+  ['pCargando','pMenu','pIngreso','pDesarrollo','pEntregar','pBuscar','pArea','pMenuArea'].forEach(function(id){
     document.getElementById(id).style.display = 'none';
   });
 
