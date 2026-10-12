@@ -2569,13 +2569,8 @@ function pintarBQ(){
     return;
   }
 
-  if(st === 'TODAS' && t.length < 2){
-    c.innerHTML = '<div class="aviso">Elige una fase para verla completa, '
-                + 'o escribe al menos 2 letras.<br>'
-                + '<span style="font-size:13px">Puedes buscar por estilo, cliente, '
-                + 'orden, color, tela, codigo o talla.</span></div>';
-    return;
-  }
+  /* Regla 500: sin fase ni busqueda se ven las 500 ordenes mas nuevas; con filtro, todas las que cumplen. */
+  var sinFiltroBQ = (st === 'TODAS' && t.length < 2);
 
   var res = [];
   for(var i=0;i<BQ.filas.length;i++){
@@ -2594,7 +2589,7 @@ function pintarBQ(){
 
   // la orden mas nueva arriba
   res.sort(function(a,b){ return Number(b.orden) - Number(a.orden); });
-  var tope = res.slice(0, 200);
+  var tope = sinFiltroBQ ? res.slice(0, 500) : res;
 
   var h = '<div class="banda"><div>' + res.length
         + (t.length >= 2 ? ' estilo(s) encontrado(s)' : ' estilo(s)') + '</div>'
@@ -2602,10 +2597,7 @@ function pintarBQ(){
         + '<div class="caja">';
   for(var j=0;j<tope.length;j++) h += filaBQ(tope[j]);
   h += '</div>';
-  if(res.length > tope.length){
-    h += '<div class="hint">Se muestran los primeros ' + tope.length
-       + '. Escribe algo mas preciso para achicar la lista.</div>';
-  }
+  if(res.length > tope.length) h += '<div class="lsTope500" style="font-size:12px;color:#5F726C;text-align:center;padding:8px 0">Se muestran los 500 registros más recientes de ' + Number(res.length).toLocaleString('es-PE') + '. Usa los filtros para ver los demás.</div>';
   c.innerHTML = h;
 }
 
@@ -2957,19 +2949,15 @@ function abrirEntregados(){
 function pintarEntregados(){
   var c = document.getElementById('bqLista');
   var t = norm(document.getElementById('bqTexto').value);
-  if(t.length < 2){
-    c.innerHTML = '<div class="aviso">Escribe al menos 2 letras o numeros para buscar: '
-      + 'el estilo, el cliente, la orden, el color o el codigo.<br>'
-      + '<span style="font-size:13px">Aqui solo salen los estilos que ya se entregaron.</span></div>';
-    return;
-  }
+  /* Regla 500: sin busqueda se ven los 500 entregados mas recientes; con busqueda, todos los que cumplen. */
+  var sinFiltroEn = (t.length < 2);
   if(!BQ.filas.length){ c.innerHTML = '<div class="cargando">Cargando...</div>'; return; }
 
   var res = [];
   for(var i=0;i<BQ.filas.length;i++){
     var f = BQ.filas[i];
     if(norm(f.status) !== 'ENTREGADO') continue;
-    if(f.busq.indexOf(t) === -1) continue;
+    if(!sinFiltroEn && f.busq.indexOf(t) === -1) continue;
     res.push(f);
   }
   if(!res.length){
@@ -2983,15 +2971,12 @@ function pintarEntregados(){
     if(a.entregaIso !== b.entregaIso) return a.entregaIso < b.entregaIso ? 1 : -1;
     return Number(b.orden) - Number(a.orden);
   });
-  var tope = res.slice(0, 200);
+  var tope = sinFiltroEn ? res.slice(0, 500) : res;
   var h = '<div class="banda"><div>' + res.length + ' estilo(s) entregado(s)</div>'
         + '<div class="sub">solo consulta</div></div><div class="caja">';
   for(var j=0;j<tope.length;j++) h += filaEntregado(tope[j]);
   h += '</div>';
-  if(res.length > tope.length){
-    h += '<div class="hint">Se muestran los primeros ' + tope.length
-       + '. Escribe algo mas preciso para achicar la lista.</div>';
-  }
+  if(res.length > tope.length) h += '<div class="lsTope500" style="font-size:12px;color:#5F726C;text-align:center;padding:8px 0">Se muestran los 500 registros más recientes de ' + Number(res.length).toLocaleString('es-PE') + '. Usa los filtros para ver los demás.</div>';
   c.innerHTML = h;
 }
 
