@@ -8,12 +8,15 @@
 /* WIP Muestras · pantalla de Servicio (30/09/2026).
    La pantalla es una sola, index.html; esta página solo la abre en el modo de su área.
    Qué puede registrar cada persona lo decide Supabase con los permisos del portal. */
-location.replace('index.html?area=servicio' + location.hash);
+(function(){ /* conserva lo que trae el link (p. ej. ?usuario= del portal de Sistemas) */
+  var q = new URLSearchParams(location.search); q.set('area', 'servicio');
+  location.replace('index.html?' + q.toString() + location.hash);
+})();
 </script>
 </head>
 <body style="margin:0;background:#F1F6F4;font-family:Calibri,Arial,sans-serif;">
 <p style="padding:24px;color:#5F726C;font-size:14px">Abriendo WIP Servicio&hellip;
-<a href="index.html?area=servicio" style="color:#0F7A5A;font-weight:700">Si no abre, toca aquí</a>.</p>
+<a href="index.html?area=servicio" id="lnk" style="color:#0F7A5A;font-weight:700">Si no abre, toca aquí</a>.</p>
 
 <!-- ===== lives-actualizar v1 · 2026-10-06 · aviso de versión nueva (común a todas las herramientas).
      Revisa cada 3 minutos (y al volver a la pestaña) si el archivo publicado cambió. Si cambió,
