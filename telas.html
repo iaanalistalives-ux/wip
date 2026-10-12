@@ -1005,7 +1005,7 @@ function cargar(){
     sel.innerHTML = '<option value="">Todas</option>';
     (r.ubicaciones||[]).forEach(function(u){ var o=document.createElement('option'); o.value=u; o.textContent=u; sel.appendChild(o); });
     sel.value = v;
-    $('st').innerHTML = '<b>'+r.enAlmacen+'</b> en almacén · <b>'+r.porDevolver+'</b> por devolver<br>Actualizado '+esc(r.actualizado);
+    $('st').innerHTML = '<b>'+r.enAlmacen+'</b> en almacén · <b>'+r.porDevolver+'</b> por devolver';
     $('hEstado').innerHTML = esc(NOMBRE) + '<br>' + (r.enAlmacen + r.porDevolver) + ' bultos en el almacén · ' + esc(r.actualizado);
     $('nIng').innerHTML = '<span class="big">'+r.enAlmacen+'</span>bultos registrados'; $('nIng').className='n';
     $('nBus').innerHTML = '<span class="big">'+(r.enAlmacen+r.porDevolver)+'</span>bultos en el almacén'; $('nBus').className='n';
