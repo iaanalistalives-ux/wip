@@ -3292,8 +3292,8 @@ function cargarServicios(){
         b.innerHTML = '<div class="aviso">La confirmacion de servicio todavia no esta activada: '
           + 'falta ' + (r.sinColumna ? 'la columna <b>SERVICIO</b> en el WIP'
                                      : 'la tabla de clientes en <b>ERORRES</b>')
-          + '.<br>Corre <b>instalarServicio</b> una vez desde el editor de Apps Script '
-          + '(Ejecutar &rarr; instalarServicio) y recarga con Ctrl+Shift+R.</div>';
+          + '.<br>Avisa a Christian '
+          + 'y recarga con Ctrl+Shift+R.</div>';
         SERVICIOS_CONF = null;
         return;
       }
@@ -4145,7 +4145,7 @@ function panelEditar(){
   var h = '<div class="rot">Editar</div>';
   if(d.faltaAvios){
     h += '<div class="aviso">Para poner la fecha de llegada de avios falta crear sus columnas: '
-       + 'corre <b>instalarAvios</b> una vez desde el editor de Apps Script.</div>';
+       + 'avisa a Christian.</div>';
   }
   for(var i=0;i<d.editables.length;i++){
     var e = d.editables[i];
