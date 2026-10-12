@@ -705,7 +705,6 @@ details.help b{color:#333;}
     <button class="btn sm oculto" id="btnVolver" onclick="ir('menu')">&larr; Menú</button>
     <span class="who" id="who">…</span>
     <span class="tit" id="tit"></span>
-    <button class="btn sm" onclick="cargar()">Actualizar</button>
     <div class="spin" id="spTop"></div>
     <div class="st" id="st">Conectando…</div>
   </div>
@@ -1154,7 +1153,7 @@ function sinConexion(texto){
   $('menu').style.visibility = '';
   $('st').textContent = 'Sin conexión con la base';
   $('hEstado').textContent = 'Sin conexión';
-  msg('msgGen', 'err', '<b>No se pudo leer el inventario.</b> ' + esc(texto) + ' Toca <b>Actualizar</b> para volver a intentar.');
+  msg('msgGen', 'err', '<b>No se pudo leer el inventario.</b> ' + esc(texto) + ' Para volver a intentar, actualiza la pantalla desde el portal.');
   if(!D){ ['nIng','nBus','nDev'].forEach(function(id){ $(id).textContent='Sin conexión'; $(id).className='n off'; }); }
 }
 function llenar(id, arr){ var d=$(id); d.innerHTML=''; (arr||[]).forEach(function(v){ var o=document.createElement('option'); o.value=v; d.appendChild(o); }); }
@@ -1303,7 +1302,7 @@ function guardarEdicion(){
   }).catch(function(e){
     $('btnEdit').disabled = false; spin('spEdit', false);
     msg('msgEdit','err','<b>No se pudo confirmar el cambio.</b> '+esc(e.message)+
-      ' Cierra, toca <b>Actualizar</b> y revisa la tela antes de volver a intentar.');
+      ' Cierra, actualiza la pantalla desde el portal y revisa la tela antes de volver a intentar.');
   });
 }
 
@@ -1315,7 +1314,7 @@ function marcar(id){
     if(!r || !r.ok){ msg('msgBus','err',esc((r && r.error) || 'No se pudo marcar.')); cargar(); return; }
     msg('msgBus','ok','<b>Tela marcada por devolver.</b> Ya aparece en la pantalla de devolución, también para Corte.');
     cargar();
-  }).catch(function(e){ cerrar('mDet'); msg('msgBus','err',esc(e.message)+' Toca Actualizar para ver si quedó marcada.'); });
+  }).catch(function(e){ cerrar('mDet'); msg('msgBus','err',esc(e.message)+' Actualiza la pantalla desde el portal para ver si quedó marcada.'); });
 }
 function desmarcar(id){
   if(!confirm('¿Quitar la marca de devolución? La tela vuelve a figurar como disponible.')) return;
@@ -1325,7 +1324,7 @@ function desmarcar(id){
     if(!r || !r.ok){ msg('msgBus','err',esc((r && r.error) || 'No se pudo quitar la marca.')); cargar(); return; }
     msg('msgBus','ok','<b>Marca retirada.</b> La tela vuelve a estar en almacén.');
     cargar();
-  }).catch(function(e){ cerrar('mDet'); msg('msgBus','err',esc(e.message)+' Toca Actualizar para ver cómo quedó.'); });
+  }).catch(function(e){ cerrar('mDet'); msg('msgBus','err',esc(e.message)+' Actualiza la pantalla desde el portal para ver cómo quedó.'); });
 }
 
 /* ---------- 3. devolución ---------- */
@@ -1380,7 +1379,7 @@ function confirmarDev(){
     cargar();
   }).catch(function(e){
     $('btnConfSi').disabled = false; cerrar('mConf'); spin('spDev', false); $('btnConf').disabled = false;
-    msg('msgDev','err','<b>No se pudo confirmar la salida.</b> '+esc(e.message)+' Toca Actualizar: si ya no aparecen, sí se registró.');
+    msg('msgDev','err','<b>No se pudo confirmar la salida.</b> '+esc(e.message)+' Actualiza la pantalla desde el portal: si ya no aparecen, sí se registró.');
     cargar();
   });
 }
