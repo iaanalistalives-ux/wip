@@ -665,7 +665,9 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
   .fcab .cerrar{background:none;border:1px solid rgba(255,255,255,.5);color:#fff;
                 border-radius:8px;padding:7px 12px;cursor:pointer;font-size:16px;
                 position:absolute;top:17px;right:18px;}
-  .fcab .fdest{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto;}
+  .fcab .fdest{display:flex;flex-direction:column;align-items:flex-end;gap:10px;margin-left:auto;}
+  /* arriba las fechas, abajo el status (pedido de Jose, 13/10) */
+  .fcab .fdfila{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
   .fcab .fdi{background:rgba(255,255,255,.15);border-radius:10px;padding:10px 15px;}
   .fcab .fdi.mal{background:rgba(255,255,255,.15);border:1px solid #f9ab00;}
   .fcab .fdl{font-size:10px;opacity:.85;text-transform:uppercase;
@@ -735,7 +737,7 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
   @media print{
     @page{margin:12mm 10mm;}
     body{background:#fff;}
-    .barra,.impr,#modal,#barraNuevos,#barraTela,#barraAvios,#barraServicio,
+    .barra,.impr,#modal,#barraNuevos,#barraTela,#barraAvios,#barraServicio,#barraComercial,
     #pMenu,#pIngreso,#pDesarrollo,#pBuscar,#pArea,#pMenuArea,
     .filtros,.plano,.hint{display:none!important;}
     .wrap{max-width:none;padding:0;}
@@ -853,6 +855,38 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
   .fnew td:last-child{width:1%;white-space:nowrap;}
   .fnew select{padding:8px 10px;border:1px solid var(--linea);border-radius:7px;
                font-size:14px;font-family:inherit;background:#fff;min-width:130px;}
+  /* buscador: requerimiento y despacho al costado de la talla, etiqueta gris
+     y fecha en negrita, como "Tela JE2165" */
+  .est .dt2.fch{color:var(--gris);font-weight:normal;}
+  .est .dt2.fch b{color:#0B815E;font-weight:bold;}
+  .est .dt2.fch1{margin-left:12px;}
+  .est .dt2.fch.tarde{color:var(--gris);font-weight:normal;}   /* la etiqueta sigue gris */
+  .est .dt2.fch.tarde b{color:var(--alerta);}                   /* solo la fecha en rojo */
+
+  /* costura: barra de avios atrasados, en rojo */
+  .nuevos.tarde{background:#FDECEC;border-color:var(--alerta);}
+  .est .chip.avh{background:#FEF3E2;color:#7A4405;font-weight:bold;}
+  .est .chip.avt{background:#FDECEC;color:var(--alerta);font-weight:bold;}
+  .est .dt2 b.col{color:var(--azul);}
+
+  /* Comercial: fecha de entrega en la tarjeta y aviso de fecha cambiada */
+  .chip.fc{background:#E7F4EF;color:#0B815E;font-weight:bold;}
+  .chip.fcp{background:#EEF1F0;color:var(--gris);font-weight:bold;}
+  .chip.fcc{background:#FEF3E2;color:#B45309;font-weight:bold;}
+  .fnew input.fcom{border-color:#A9D6C5;}
+
+  /* minutaje en la misma fila: engranaje para abrir, check para guardar */
+  button.engr,.fnew button.engr{border:1px solid var(--linea);background:#fff;color:var(--gris);
+        border-radius:7px;padding:4px 8px;font-size:15px;line-height:1;cursor:pointer;
+        vertical-align:middle;margin-left:6px;font-weight:normal;}
+  button.engr:hover,.fnew button.engr:hover{background:#F6FAF8;color:var(--azul);}
+  button.engr.ok,.fnew button.engr.ok{background:var(--ok);border-color:var(--ok);color:#fff;font-weight:bold;}
+  button.engr[disabled],.fnew button.engr[disabled]{background:#9BAAA5;border-color:#9BAAA5;color:#fff;}
+  .minIn{width:84px;padding:6px 8px;border:1px solid var(--azul);border-radius:7px;
+         font-size:14px;font-family:inherit;}
+  .minCel{white-space:nowrap;}
+  td.minCel{min-width:150px;}     /* que la tabla no salte al abrir el campo */
+
   /* llegadas de hoy (tela y avios): la fecha y los dos botones al costado */
   .lleg .izq{cursor:pointer;}
   .lleg .acc{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
@@ -880,7 +914,9 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
   .fila2{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;align-items:flex-end;}
   .fila2 .cel{flex:0 0 auto;min-width:255px;}
   .fila2 .busc{flex:1;min-width:230px;}
-  .fila2 select,.fila2 input,#arTexto{width:100%;padding:12px;font-size:15px;background:#fff;
+  .fila1 .cel{flex:0 0 auto;min-width:255px;}
+  .fila1{align-items:flex-end;}
+  .fila1 select,.fila2 select,.fila2 input,#arTexto{width:100%;padding:12px;font-size:15px;background:#fff;
            border:1px solid var(--linea);border-radius:8px;outline:none;
            font-family:inherit;color:var(--texto);}
   .fila2 select:focus,.fila2 input:focus,#arTexto:focus{border-color:var(--azul);}
@@ -993,6 +1029,14 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
   .rejilla .tarjeta:nth-child(2):before{background:#10B981;}
   .rejilla .tarjeta:nth-child(3):before{background:#0B815E;}
   .rejilla .tarjeta:nth-child(4):before{background:var(--amba);}
+  /* filtros de una sola fila en PC (semana y status lado a lado, Imprimir no baja) y a lo ancho en celular */
+  .fila1 .cel{flex:1 1 200px;min-width:150px;max-width:260px;}
+  .fila1 > div[style="flex:1"]{flex:1 1 0 !important;min-width:0;}
+  @media (max-width:600px){
+    .fila1 .cel{flex:1 1 100%;max-width:none;min-width:0;}
+    .banda{flex-wrap:wrap;gap:4px 10px;}
+    .banda .sub{white-space:normal;}
+  }
 </style>
 
 <style id="estiloEmbebido" media="not all">
@@ -1024,6 +1068,7 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
 </style>
 </head>
 <body>
+
 
 <div class="barra">
   <div>
@@ -1090,13 +1135,19 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
     <div id="barraTela"></div>
     <div id="barraAvios"></div>
     <div id="barraServicio"></div>
+    <div id="barraComercial"></div>
     <div id="barraNuevos"></div>
     <div class="filtros">
       <div class="fila1">
-        <div style="flex:1;min-width:230px">
+        <div class="cel">
           <div class="etf">Semana de despacho</div>
-          <div class="semanas" id="semanas"></div>
+          <select id="semanas" onchange="filtrarSemana(this.value)"></select>
         </div>
+        <div class="cel">
+          <div class="etf">Status</div>
+          <select id="estados" onchange="filtrarStatus(this.value)"></select>
+        </div>
+        <div style="flex:1"></div>
         <div class="tot" id="tot">
           <div class="tv" id="totV">0</div>
           <div class="te" id="totE">prendas</div>
@@ -1108,10 +1159,6 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
         <button class="impr" id="btnImpr" onclick="imprimirWip()">&#128424; Imprimir</button>
       </div>
       <div class="fila2">
-        <div class="cel">
-          <div class="etf">Status</div>
-          <select id="estados" onchange="filtrarStatus(this.value)"></select>
-        </div>
         <div class="cel busc">
           <div class="etf">Buscar</div>
           <input id="buscaPE" placeholder="Estilo, cliente, orden, color, tela..." autocomplete="off">
@@ -1130,12 +1177,14 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
       <div class="fila2">
         <div class="cel" id="bqFaseCel">
           <div class="etf">Fase</div>
-          <select id="bqEstado" onchange="BQ.soloSinMin=false;pintarBQ()"></select>
+          <select id="bqEstado" onchange="BQ.soloSinMin=false;BQ.tope=BQ_TOPE;pintarBQ()"></select>
         </div>
         <div class="cel busc">
           <div class="etf">Buscar</div>
           <input id="bqTexto" placeholder="Estilo, cliente, orden, color, tela..." autocomplete="off">
         </div>
+        <button class="impr" id="btnExcel" onclick="descargarExcel()"
+                title="Baja en Excel lo que esta filtrado, con la fecha y hora de cada etapa">&#11015; Descargar Excel</button>
       </div>
     </div>
     <div id="bqLista"></div>
@@ -1158,6 +1207,57 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
   </div>
 
   <!-- ===================== PANTALLA DE AREA ===================== -->
+  <!-- =============== SEGUIMIENTO DE PROTOS (Comercial) =============== -->
+  <div id="pComercial" style="display:none">
+    <div class="filtros">
+      <div class="fila1">
+        <div class="cel">
+          <div class="etf">Cliente</div>
+          <select id="coCliente" onchange="CO.tope=CO_TOPE;pintarComercial()"></select>
+        </div>
+        <div class="cel">
+          <div class="etf">Status</div>
+          <select id="coStatus" onchange="CO.tope=CO_TOPE;pintarComercial()"></select>
+        </div>
+        <div style="flex:1"></div>
+        <div class="tot"><div class="tv" id="coV">0</div><div class="te">estilos</div></div>
+      </div>
+      <div class="fila2">
+        <div class="cel busc">
+          <div class="etf">Buscar</div>
+          <input id="coTexto" placeholder="Estilo, estilo del cliente, color, orden..." autocomplete="off">
+        </div>
+      </div>
+    </div>
+    <div id="coLista"><div class="cargando">Cargando...</div></div>
+  </div>
+
+  <!-- =============== SEGUIMIENTO DE MOLDES (area de moldes) =============== -->
+  <div id="pMoldes" style="display:none">
+    <div id="moAviso"></div>
+    <div class="filtros">
+      <div class="fila1">
+        <div class="cel">
+          <div class="etf">Cliente</div>
+          <select id="moCliente" onchange="MO.tope=MO_TOPE;pintarMoldes()"></select>
+        </div>
+        <div class="cel">
+          <div class="etf">Moldes</div>
+          <select id="moEstado" onchange="MO.tope=MO_TOPE;pintarMoldes()"></select>
+        </div>
+        <div style="flex:1"></div>
+        <div class="tot"><div class="tv" id="moV">0</div><div class="te">estilos</div></div>
+      </div>
+      <div class="fila2">
+        <div class="cel busc">
+          <div class="etf">Buscar</div>
+          <input id="moTexto" placeholder="Estilo, cliente, color, codigo, orden..." autocomplete="off">
+        </div>
+      </div>
+    </div>
+    <div id="moLista"><div class="cargando">Cargando...</div></div>
+  </div>
+
   <div id="pArea" style="display:none">
     <div id="arMsg"></div>
     <div id="arAvios"></div>
@@ -1297,6 +1397,7 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
     { campo:'FASE',               etiqueta:'Fase',                      tipo:'fase',    dato:'fase' },
     { campo:'CÓDIGO',             etiqueta:'Codigo',                    tipo:'codigo',  dato:'codigo' },
     { campo:'XF REAL',            etiqueta:'Fecha de despacho',         tipo:'fecha',   dato:'xf' },
+    { campo:'FECHA_COM',          etiqueta:'Fecha para Comercial',      tipo:'fechacom', dato:'fechaCom' },
     { campo:'TELA_PROY',          etiqueta:'Fecha de llegada de tela',  tipo:'tela' },
     { campo:'AVIOS_PROY',         etiqueta:'Fecha de llegada de avios', tipo:'avios' },
     { campo:'CLIENTE',            etiqueta:'Cliente',                   tipo:'cliente', dato:'cliente' },
@@ -1342,10 +1443,22 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
   }
   function _hora(){ var d = new Date(); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
   function _hoyIso(){ return _iso(new Date()); }
+  /* Semana del calendario (ISO 8601, lunes a domingo), igual que la base y que ISOWEEKNUM. */
   function _semana(d){
-    var ini = new Date(d.getFullYear(), 0, 1);
-    var dias = Math.floor((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - ini) / 86400000);
-    return Math.ceil((dias + ini.getDay() + 1) / 7) - 1;
+    var t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    var dia = t.getUTCDay() || 7;
+    t.setUTCDate(t.getUTCDate() + 4 - dia);
+    var ini = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+    return Math.ceil(((t - ini) / 86400000 + 1) / 7);
+  }
+  /* Mock Up de Ingenieria: termina en corte */
+  function _terminaEnCorte(fase){ return /MOCK ?UP.*INGENIER/.test(_norm(fase)); }
+  function _conf(){ var c = {}; (DATOS.confirmadas || []).forEach(function(o){ c[String(o)] = true; }); return c; }
+  /* dias habiles despues de a, hasta b inclusive */
+  function _habilesEntre(a, b){
+    var f = new Date(a.getFullYear(), a.getMonth(), a.getDate()), fin = new Date(b.getFullYear(), b.getMonth(), b.getDate()), n = 0, tope = 0;
+    while (f < fin && tope < 3000){ f.setDate(f.getDate() + 1); tope++; var w = f.getDay(); if (w === 0 || w === 6 || T.feriados[_iso(f)]) continue; n++; }
+    return n;
   }
   function _diasDeFase(fase){
     var f = _norm(fase), d = null;
@@ -1377,7 +1490,8 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
   function _esNovedad(tipo){
     var t = _norm(tipo);
     return t.indexOf('CAMBIO') === 0 || t.indexOf('REPROG') !== -1 || t.indexOf('REPROCESO') === 0 || t === 'ANULADO'
-        || t === 'SERVICIO' || t === 'RETORNO' || t === 'STAND BY' || t === 'CANCELADO' || t === 'CANTIDAD CORTADA';
+        || t === 'SERVICIO' || t === 'RETORNO' || t === 'STAND BY' || t === 'CANCELADO' || t === 'CANTIDAD CORTADA'
+        || t === 'FECHA COMERCIAL' || t === 'CAMBIO FECHA COMERCIAL';
   }
   function _sinX(s){ var t = _txt(s); return (t.toUpperCase().indexOf('X ') === 0) ? t.substring(2).trim() : t; }
   function _mismoDia(a, b){ return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
@@ -1454,11 +1568,11 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
         out.push({ orden:orden, lives:_txt(f.lives), cliente:_txt(f.cliente), grupo:_txt(f.grupo), fase:_txt(f.fase),
                    combo:_txt(f.combo), cant:_txt(f.cant), talla:_txt(f.talla), status:_txt(f.status), freq:_txt(f.freq),
                    xf: fxf ? _fechaTexto(fxf) : '', iso: fxf ? _iso(fxf) : '',
-                   origen: _txt(f.analista) ? 'DESARROLLO' : 'COMERCIAL', minutos:_num(f.minutos),
-                   quien: _txt(f.analista) || _txt(f.ejecutiva) });
+                   origen: _txt(f.analista) ? (_terminaEnCorte(f.fase) ? 'INGENIERIA' : 'DESARROLLO') : 'COMERCIAL', minutos:_num(f.minutos),
+                   quien: _txt(f.analista) || _txt(f.ejecutiva), fechaCom: _fecha(f.fechaCom) ? _fechaTexto(_fecha(f.fechaCom)) : '' });
       }
       out.sort(function(a, b){ return Number(b.orden) - Number(a.orden); });
-      return { ok:true, filas:out, desde:DATOS.ordenDesde, hora:_hora() };
+      return { ok:true, filas:out, desde:DATOS.ordenDesde, hora:_hora(), hayCom:true };
     });
   }
 
@@ -1472,7 +1586,8 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
         var o = { orden:orden, lives:_txt(f.lives), estcli:_txt(f.estcli), cliente:_txt(f.cliente), grupo:_txt(f.grupo),
                   fase:_txt(f.fase), codigo:_txt(f.codigo), combo:_txt(f.combo), cant:_txt(f.cant), talla:_txt(f.talla),
                   status:st, minutos:_num(f.minutos), vigente: FUERA_DEL_PROGRAMA.indexOf(_norm(st)) === -1,
-                  xf: fxf ? _fechaTexto(fxf) : '', entrega: fe ? _fechaTexto(fe) : '', entregaIso: fe ? _iso(fe) : '' };
+                  xf: fxf ? _fechaTexto(fxf) : '', xfIso: fxf ? _iso(fxf) : '', freq: _fecha(f.freq) ? _fechaTexto(_fecha(f.freq)) : '',
+                  entrega: fe ? _fechaTexto(fe) : '', entregaIso: fe ? _iso(fe) : '' };
         o.busq = _norm([o.orden, o.lives, o.estcli, o.cliente, o.grupo, o.combo, o.codigo, _txt(f.articulo), o.fase, o.talla, o.status].join(' '));
         out.push(o);
       });
@@ -1606,7 +1721,7 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
       tipos[tn] = true;
       var esCambio = _esNovedad(mv.tipo), fEv = _fecha(mv.despues), qq, pie;
       if (!esCambio && fEv){
-        qq = (_norm(mv.tipo) === 'ENTREGA') ? 'INSPECCION' : mv.tipo;
+        qq = (_norm(mv.tipo) === 'ENTREGA') ? (/^MOCK UP/.test(_norm(mv.detalle)) ? 'ENTREGADO' : 'INSPECCION') : mv.tipo;
         pie = _fechaTexto(fEv);
         var dReg = _soloDia(mv.fecha);
         if (dReg && dReg !== pie) pie += '  \u00b7  anotado el ' + mv.fecha;
@@ -1626,6 +1741,10 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
           qq = 'SERVICIO  \u00b7  VUELVE' + (a ? '  \u2014  a ' + a : '');
         } else if (t === 'ANULADO'){
           qq = (de ? de + '  \u00b7  ' : '') + 'REGISTRO ANULADO' + (a ? '  \u2014  vuelve a ' + a : '');
+        } else if (t === 'FECHA COMERCIAL'){
+          qq = 'FECHA PARA COMERCIAL  \u2014  ' + mv.despues;
+        } else if (t === 'CAMBIO FECHA COMERCIAL'){
+          qq = 'FECHA PARA COMERCIAL CAMBIADA  \u2014  de ' + mv.antes + ' a ' + mv.despues;
         } else if (t === 'CANTIDAD CORTADA'){
           qq = 'CORTE  \u00b7  SE CORTO OTRA CANTIDAD  \u2014  de ' + mv.antes + ' a ' + mv.despues + ' prendas';
         } else if (t === 'STAND BY'){
@@ -1696,11 +1815,13 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
         cant:_txt(f.cant), talla:_txt(f.talla), status:_txt(f.status), servicio:_txt(f.servicio), obs:_txt(f.obs),
         partida:_txt(f.partida), costurera:_txt(f.costurera), auditora:_txt(f.auditora), rutaPrenda:_txt(f.rutaPrenda),
         minutos:_txt(f.minutos), freq:_txt(f.freq), xf:_txt(f.xf), telaReal:_txt(f.telaReal),
-        aviosProy:_txt(f.aviosProy), aviosReal:_txt(f.aviosReal), faltaAvios:false, molde:_txt(f.molde), editables:[]
+        aviosProy:_txt(f.aviosProy), aviosReal:_txt(f.aviosReal), faltaAvios:false, molde:_txt(f.molde), editables:[],
+        fechaCom:_txt(f.fechaCom), analista:_txt(f.analista), faltaCom:false
       };
       d.telaProy = _telaProy(f);
       var fu = DATOS.fasesUso || [];
       EDITABLES.forEach(function(e){
+        if (e.tipo === 'fechacom'){ if (d.analista) return; d.editables.push({ campo:e.campo, etiqueta:e.etiqueta, tipo:e.tipo, valor:d.fechaCom }); return; }
         if (e.tipo === 'avios'){ if (d.aviosReal) return; d.editables.push({ campo:e.campo, etiqueta:e.etiqueta, tipo:e.tipo, valor:d.aviosProy }); return; }
         if (e.tipo === 'tela'){ if (d.telaReal) return; d.editables.push({ campo:e.campo, etiqueta:e.etiqueta, tipo:e.tipo, valor:d.telaProy }); return; }
         var it = { campo:e.campo, etiqueta:e.etiqueta, tipo:e.tipo, valor:_txt(f[e.dato]) };
@@ -1778,15 +1899,170 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
     });
   }
 
+  /* ---------------- SEGUIMIENTO DE PROTOS (Comercial) ---------------- */
+  /* De Comercial (sin ANALISTA), vigentes, con su fecha confirmada del WIP (o de antes del sistema)
+     y todavia sin fecha para Comercial. Solo Desarrollo los ve. */
+  function getSinFechaComercial(){
+    return cargar().then(function(){
+      if (!WM.des) return { ok:true, filas:[] };
+      var conf = _conf(), out = [];
+      DATOS.filas.forEach(function(f){
+        var orden = _txt(f.orden); if (!orden) return;
+        var st = _norm(f.status); if (!st || FUERA_DEL_PROGRAMA.indexOf(st) !== -1) return;
+        if (_txt(f.analista)) return;
+        if (_fecha(f.fechaCom)) return;
+        var n = Number(orden); if (!isNaN(n) && n >= DATOS.ordenDesde && !conf[orden]) return;
+        var fxf = _fecha(f.xf);
+        out.push({ orden:orden, lives:_txt(f.lives), cliente:_txt(f.cliente), grupo:_txt(f.grupo), fase:_txt(f.fase),
+                   combo:_txt(f.combo), cant:_txt(f.cant), talla:_txt(f.talla), status:_txt(f.status), freq:_txt(f.freq),
+                   minutos:_num(f.minutos), xf: fxf ? _fechaTexto(fxf) : '', iso: fxf ? _iso(fxf) : '' });
+      });
+      out.sort(function(a, b){ return a.iso < b.iso ? -1 : (a.iso > b.iso ? 1 : 0); });
+      return { ok:true, filas:out };
+    });
+  }
+  function getSeguimiento(){
+    return cargar().then(function(){
+      var camb = {}; (DATOS.comCambiada || []).forEach(function(o){ camb[String(o)] = true; });
+      var out = [];
+      DATOS.filas.forEach(function(f){
+        var orden = _txt(f.orden); if (!orden) return;
+        var st = _norm(f.status); if (!st || FUERA_DEL_PROGRAMA.indexOf(st) !== -1) return;
+        if (_txt(f.analista)) return;                       // lo pidio Desarrollo o Ingenieria
+        var fc = _fecha(f.fechaCom), cant = _num(f.cant), fr = _fecha(f.freq);
+        var o = { orden:orden, lives:_txt(f.lives), estcli:_txt(f.estcli), cliente:_txt(f.cliente), grupo:_txt(f.grupo),
+                  fase:_txt(f.fase), combo:_txt(f.combo), cant:(cant === '' ? '' : cant), talla:_txt(f.talla), status:_txt(f.status),
+                  fechaCom: fc ? _fechaTexto(fc) : '', comIso: fc ? _iso(fc) : '', dia: fc ? DIAS_SEMANA[fc.getDay()] : '',
+                  cambiada: !!camb[orden], freq: fr ? _fechaTexto(fr) : '' };
+        o.busq = _norm([o.orden, o.lives, o.estcli, o.cliente, o.grupo, o.combo, o.fase, o.talla, o.status].join(' '));
+        out.push(o);
+      });
+      return { ok:true, filas:out, hoyIso:_hoyIso() };
+    });
+  }
+  /* La ficha que ve Comercial: sin nombres, sin la fecha del WIP y sin comentarios internos. */
+  function getFichaComercial(orden){
+    return getFicha(orden).then(function(d){
+      if (!d || !d.ok) return d;
+      if (d.analista) return { ok:false, msg:'Este estilo es un requerimiento de Desarrollo: no esta en el seguimiento de Comercial.' };
+      var ruta = [], hoy = null;
+      for (var i = 0; i < d.ruta.length; i++){
+        var it = d.ruta[i];
+        if (it.hoy){ hoy = { q:it.q, c:'Situacion de hoy', cam:true, hoy:true, fin:it.fin }; continue; }
+        if (it.com) continue;
+        var q = _norm(it.q);
+        var sirve = /^(TELA|MOLDE|CORTE|COSTURA|INSPECCION|ENTREGA)\b/.test(q)
+                 || q.indexOf('ENVIADO A SERVICIO') >= 0 || q.indexOf('SERVICIO \u00b7 VUELVE') === 0
+                 || q.indexOf('AVIOS LLEGARON') === 0;
+        if (!sirve) continue;
+        var dia = String(it.c || '').split('  \u00b7  ')[0];
+        ruta.push({ q:it.q, c:dia, cam:it.cam, ts:it.ts || 0 });
+      }
+      for (var j = 0; j < d.historial.length; j++){
+        var mv = d.historial[j], t = _norm(mv.tipo);
+        if (t !== 'FECHA COMERCIAL' && t !== 'CAMBIO FECHA COMERCIAL') continue;
+        ruta.push({ q: t === 'FECHA COMERCIAL' ? 'FECHA DE ENTREGA  \u2014  ' + mv.despues
+                                               : 'FECHA DE ENTREGA CAMBIADA  \u2014  de ' + mv.antes + ' a ' + mv.despues,
+                    c: _soloDia(mv.fecha) + (mv.motivo ? '  \u00b7  Motivo: ' + mv.motivo : ''), cam:true, ts: mv.orden3 || 0 });
+      }
+      ruta.sort(function(a, b){ return a.ts - b.ts; });
+      if (hoy) ruta.push(hoy);
+      return { ok:true, orden:d.orden, lives:d.lives, estcli:d.estcli, cliente:d.cliente, grupo:d.grupo, fase:d.fase,
+               combo:d.combo, cant:d.cant, talla:d.talla, status:d.status, fechaCom:d.fechaCom, freq:d.freq, ruta:ruta };
+    });
+  }
+
+  /* ---------------- SEGUIMIENTO DE MOLDES ---------------- */
+  var PLAZO_MOLDE_DIAS = 2;            // dias habiles desde el requerimiento
+  function getSeguimientoMoldes(){
+    return cargar().then(function(){
+      var hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+      var coment = DATOS.comentMolde || {}, out = [];
+      DATOS.filas.forEach(function(f){
+        var orden = _txt(f.orden); if (!orden) return;
+        if (/^#/.test(_txt(f.lives)) || /^#/.test(_txt(f.cliente))) return;
+        var st = _norm(f.status), fm = _fecha(f.molde), nv = _nivel(f.status);
+        var pendiente = !fm && (st === 'X MOLDE' || st === 'X TELA / MOLDE');
+        var entregado = !!fm || nv === 1 || nv >= 3 || st === 'X SERVICIO';
+        if (!pendiente && !entregado) return;
+        if (!pendiente && st === 'CANCELADO' && !fm) return;
+        var fr = _fecha(f.freq), lim = fr ? _diaHabil(fr, PLAZO_MOLDE_DIAS) : null;
+        var atraso = (pendiente && lim && hoy > lim) ? _habilesEntre(lim, hoy) : 0;
+        var cant = _num(f.cant), fx = _fecha(f.xf);
+        var o = { orden:orden, lives:_txt(f.lives), estcli:_txt(f.estcli), cliente:_txt(f.cliente), grupo:_txt(f.grupo),
+                  fase:_txt(f.fase), codigo:_txt(f.codigo), combo:_txt(f.combo), cant:(cant === '' ? '' : cant),
+                  talla:_txt(f.talla), status:_txt(f.status), pendiente:pendiente,
+                  freq: fr ? _fechaTexto(fr) : '', limite: lim ? _fechaTexto(lim) : '', limiteIso: lim ? _iso(lim) : '',
+                  molde: fm ? _fechaTexto(fm) : '', moldeIso: fm ? _iso(fm) : '',
+                  xf: fx ? _fechaTexto(fx) : '', xfIso: fx ? _iso(fx) : '',
+                  vigente: st !== 'ENTREGADO' && st !== 'CANCELADO', atraso:atraso, comentarios: Number(coment[orden] || 0) };
+        o.busq = _norm([o.orden, o.lives, o.estcli, o.cliente, o.grupo, o.codigo, o.combo, o.fase, o.talla, o.status].join(' '));
+        out.push(o);
+      });
+      return { ok:true, filas:out, plazo:PLAZO_MOLDE_DIAS };
+    });
+  }
+
+  /* ---------------- EXCEL DEL BUSCADOR ----------------
+     Las columnas del WIP que se usan (lista de José, 13/10: sin las 26 que no se usan) y al final
+     cuando se registro cada etapa en el sistema, con hora. Las fechas van 'aaaa-mm-dd'. */
+  var EXCEL_SIN_COLUMNAS = ['ANALISTA','XF COMERCIAL','XF COSTURA','VAPORIZADO','LAVADO (W)','TIPO DE PDA','ENVIO LAV',
+    'INGRESO LAV','STATUS LAV','INICIAL F','FINAL F','INICIAL M','INICIAL COR','INICIAL PZA','FINAL PZA','INICIAL COST',
+    'INICIAL','FINAL','INICIAL INSP','FINAL INSP','Q','%','COMENT 2','ESTADO','ESTILO','AVIOS REAL'];
+  var EXCEL_COLS = [
+    ['ORDEN','orden','n'], ['EJECUTIVA','ejecutiva'], ['FECHA REQUERIDA','freq','f'], ['CLIENTE','cliente'],
+    ['RUTA DE PRENDA','rutaPrenda'], ['GRUPO','grupo'], ['ESTILO LIVES','lives'], ['ESTILO CLIENTE','estcli'], ['FASE','fase'],
+    ['CÓDIGO','codigo'], ['ARTÍCULO','articulo'], ['COMBO','combo'], ['SEMANA','semana','n'], ['XF REAL','xf','f'],
+    ['CANTIDAD REQUERIDA','cant','n'], ['TALLA','talla'], ['STATUS','status'], ['OBSERVACION','obs'], ['MINUTOS','minutos','n'],
+    ['PARTIDA','partida'], ['INGRESO TELA PROY 1','telaProy1','f'], ['INGRESO TELA PROY 2','telaProy2','f'],
+    ['INGRESO TELA PROY 3','telaProy3','f'], ['INGRESO TELA REAL','telaReal','f'], ['FINAL M','molde','f'], ['FINAL COR','corte','f'],
+    ['FINAL COST','costura','f'], ['F. INICIAL DESPACHO','entrega','f'], ['COSTURERA','costurera'], ['SERVICIO','servicio'],
+    ['AVIOS LLEGAN','aviosProy','f'], ['FECHA COMERCIAL','fechaCom','f']];
+  var ETAPAS_EXCEL = [
+    { tipo:'TELA',    campo:'telaReal', titulo:'TELA REGISTRADA (fecha y hora)' },
+    { tipo:'MOLDE',   campo:'molde',    titulo:'MOLDE REGISTRADO (fecha y hora)' },
+    { tipo:'CORTE',   campo:'corte',    titulo:'CORTE REGISTRADO (fecha y hora)' },
+    { tipo:'COSTURA', campo:'costura',  titulo:'COSTURA REGISTRADA (fecha y hora)' },
+    { tipo:'ENTREGA', campo:'entrega',  titulo:'ENTREGA REGISTRADA (fecha y hora)' }];
+  function getBaseExport(p){
+    var pedidas = (p && p.ordenes && p.ordenes.length) ? p.ordenes.map(String) : null;
+    return Promise.all([cargar(), rpcLeer('wm_registros_etapas', { p:{ ordenes: pedidas || [] } }, 60000)]).then(function(res){
+      var rr = res[1] || {};
+      if (!rr.ok) return { ok:false, msg: rr.msg || 'No se pudo leer el historial.' };
+      var regs = rr.regs || {}, porOrden = {};
+      DATOS.filas.forEach(function(f){ porOrden[_txt(f.orden)] = f; });
+      var lista = pedidas ? pedidas.map(function(o){ return porOrden[o]; }).filter(Boolean) : DATOS.filas.slice();
+      var encabezados = [], tipos = [];
+      EXCEL_COLS.forEach(function(c){ encabezados.push(c[0]); tipos.push(c[2] === 'f' ? 'f' : ''); });
+      ETAPAS_EXCEL.forEach(function(e){ encabezados.push(e.titulo); tipos.push('fh'); });
+      var filas = lista.map(function(f){
+        var out = EXCEL_COLS.map(function(c){
+          var v = f[c[1]];
+          if (c[2] === 'f'){ var d = _fecha(v); return d ? _iso(d) : ''; }
+          if (c[2] === 'n'){ var n = _num(v); return n === '' ? '' : n; }
+          return _txt(v);
+        });
+        var rg = regs[_txt(f.orden)] || {};
+        ETAPAS_EXCEL.forEach(function(e){ out.push(rg[e.tipo] && _txt(f[e.campo]) ? rg[e.tipo] : ''); });
+        return out;
+      });
+      return { ok:true, encabezados:encabezados, tipos:tipos, filas:filas, sinColumnas:EXCEL_SIN_COLUMNAS.slice(),
+               generado: rr.generado || '' };
+    });
+  }
+
   /* ---------------- ESCRITURAS ---------------- */
   function escribir(fn, p){
     return rpc(fn, { p:p }, 45000).then(function(r){ if (r && r.ok) SUCIO = true; return r; });
   }
+  window.WM_SUCIO = function(){ SUCIO = true; };
   var API = {
     getPorEntregar: getPorEntregar, getNuevos: getNuevos, getTodos: getTodos,
     getPorConfirmarServicio: getPorConfirmarServicio, getOpcionesDesarrollo: getOpcionesDesarrollo,
     calcularXF: calcularXF, previewIngreso: previewIngreso, getUltimoComercial: getUltimoComercial,
     getFicha: getFicha,
+    getSinFechaComercial: getSinFechaComercial, getSeguimiento: getSeguimiento, getFichaComercial: getFichaComercial,
+    getSeguimientoMoldes: getSeguimientoMoldes, getBaseExport: getBaseExport,
     registrar: function(p){
       var q = {}; for (var k in p) q[k] = p[k];
       /* en Corte el código del cortador viaja como "usuario": se manda aparte */
@@ -1836,7 +2112,7 @@ var AREA = (new URLSearchParams(location.search).get('area') || '').toLowerCase(
 /* Marca del archivo, para saber si lo que corre es lo ultimo que se
    entrego. No se muestra en pantalla: se consulta escribiendo VERSION
    en la consola del navegador (F12 -> Consola). */
-var VERSION = 'build 29sep-1 / supabase-2';
+var VERSION = 'build 19oct-2 / supabase-3';
 
 var usuario = '', PREVIEW = null;
 var PE = { filas:[], semana:'TODAS', status:'TODOS', tope:0, hora:'' };
@@ -1905,13 +2181,18 @@ function abrir(cual){
   }
   if(cual === 'buscar'){
     BQ.modo = '';
+    BQ.tope = BQ_TOPE;
     document.getElementById('bqFaseCel').style.display = '';
+    document.getElementById('btnExcel').style.display = '';
     document.getElementById('pBuscar').style.display = 'block';
     titulo('BUSQUEDA DE ESTILOS','Todo el WIP: vigentes, entregados y cancelados');
     cargarBuscar();
   }
 }
 function irMenu(){
+  if(AREA === 'comercial'){ abrirComercial(); return; }       // Comercial no tiene menu
+  if(AREA === 'moldes'){ abrirMoldes(); return; }             // moldes tampoco
+  if(AREA === 'ingenieria'){ abrirIngenieria(); return; }     // ni Ingenieria
   if(AREA && AREAS[AREA]){ menuArea(); return; }
   ocultarTodo();
   document.getElementById('pMenu').style.display = 'block';
@@ -1919,7 +2200,7 @@ function irMenu(){
   titulo('WIP MUESTRAS','Planta Barranco');
 }
 function ocultarTodo(){
-  ['pCargando','pMenu','pIngreso','pDesarrollo','pEntregar','pBuscar','pArea','pMenuArea'].forEach(function(id){
+  ['pCargando','pMenu','pIngreso','pDesarrollo','pEntregar','pBuscar','pArea','pMenuArea','pComercial','pMoldes'].forEach(function(id){
     document.getElementById(id).style.display = 'none';
   });
 
@@ -2093,10 +2374,18 @@ function pintarFormDes(){
   }
   cli += '</datalist>';
 
-  var fas = '<input id="d_fase" list="lFases" placeholder="Prenda Interna, Mock Up..." '
-          + 'oninput="recalcXF()"><datalist id="lFases">';
-  for(var j=0;j<o.fases.length;j++) fas += '<option value="' + esc(o.fases[j]) + '">';
-  fas += '</datalist>';
+  var fas;
+  if(AREA === 'ingenieria'){
+    // desde Ingenieria siempre es Mock Up Ingenieria: termina en corte
+    fas = '<input id="d_fase" value="' + esc(FASE_INGENIERIA) + '" readonly '
+        + 'style="background:#F1F6F4;font-weight:bold;color:#0E3B36">'
+        + '<div class="hint">Desde Ingenieria la fase es siempre esta. Se entrega al terminar el corte.</div>';
+  } else {
+    fas = '<input id="d_fase" list="lFases" placeholder="Prenda Interna, Mock Up..." '
+        + 'oninput="recalcXF()"><datalist id="lFases">';
+    for(var j=0;j<o.fases.length;j++) fas += '<option value="' + esc(o.fases[j]) + '">';
+    fas += '</datalist>';
+  }
 
   h += '<div class="par">';
   h +=   campo('Cliente', cli);
@@ -2105,7 +2394,7 @@ function pintarFormDes(){
 
   h += '<div class="par">';
   h +=   campo('Fase', fas);
-  h +=   campo('Codigo / Item', '<input id="d_codigo" placeholder="JE002091">');
+  h +=   campo('Codigo / Item', '<input id="d_codigo" placeholder="JE002091 · elige de la lista" autocomplete="off" style="text-transform:uppercase">');
   h += '</div>';
 
   h += '<div class="par">';
@@ -2137,7 +2426,9 @@ function pintarFormDes(){
   h += '</div>';
 
   document.getElementById('formDes').innerHTML = h;
+  listaCodigos('d_codigo', 'd_tela');
   document.getElementById('d_fecha').addEventListener('change', recalcXF);
+  if(AREA === 'ingenieria') recalcXF();     // la fase ya esta puesta: la fecha se calcula de una
 }
 
 function campo(et, control){
@@ -2167,7 +2458,8 @@ function guardarDes(btn){
     pide:   v('d_pide'),   fecha: v('d_fecha'),  cliente: v('d_cliente'),
     lives:  v('d_lives'),  fase:  v('d_fase'),   codigo:  v('d_codigo'),
     tela:   v('d_tela'),   combo: v('d_combo'),  cant:    v('d_cant'),
-    talla:  v('d_talla'),  obs:   v('d_obs'),    xf:      v('d_xf')
+    talla:  v('d_talla'),  obs:   v('d_obs'),    xf:      v('d_xf'),
+    area:   AREA                          // 'ingenieria': el servidor fija la fase y el origen
   };
 
   var faltan = [];
@@ -2195,7 +2487,7 @@ function guardarDes(btn){
         + '</b> &middot; despacho <b>' + esc(r.xf) + '</b> (semana ' + r.semana + ')'
         + '<br>Ya aparece en el programa WIP.</div>';
       if(r.sinSigla) h += '<div class="error">Ese cliente no esta en la tabla de siglas, '
-        + 'el grupo quedo como VARIOS. Agregalo en ERORRES.</div>';
+        + 'el grupo quedo como VARIOS. Pide que lo agreguen a la tabla de clientes.</div>';
       h += '<button class="plano" onclick="otroDes()">Ingresar otro</button>';
       document.getElementById('formDes').innerHTML = '';
       document.getElementById('d_res').innerHTML = h;
@@ -2244,6 +2536,7 @@ function cargarPorEntregar(){
       pintarPE();
       cargarNuevos();
       if(!AREA) cargarServicios();   // la confirmacion de servicio es de Desarrollo
+      if(!AREA) cargarSinFechaComercial();
     })
     .withFailureHandler(function(e){
       document.getElementById('listaPE').innerHTML =
@@ -2263,11 +2556,15 @@ function pasaBusq(f){
   return t.length < 2 || f.busq.indexOf(t) !== -1;
 }
 function pasaSem(f){ return PE.semana === 'TODAS' || claveSem(f) === PE.semana; }
-/* X TELA / MOLDE es un estilo al que le falta la tela Y el molde. Por eso sale
-   al filtrar por X TELA (le falta tela) y tambien por X MOLDE (le falta
-   molde), junto con los que solo esperan una de las dos cosas. */
+/* X TELA / MOLDE es un estilo al que le falta la tela Y el molde.
+   - X MOLDE los incluye: junto con los que solo esperan molde, son todos los
+     que esperan molde.
+   - X TELA no: muestra solo los que esperan unicamente la tela (pedido de
+     Jose, 13/10). Para ver los que esperan las dos cosas esta X TELA / MOLDE.
+   Si algun dia X TELA tambien debe incluirlos, basta con agregarlo aca. */
 var ST_AMBOS = 'X TELA / MOLDE';
-function incluyeAmbos(st){ return norm(st) === 'X TELA' || norm(st) === 'X MOLDE'; }
+var ST_QUE_INCLUYEN_AMBOS = ['X MOLDE'];
+function incluyeAmbos(st){ return ST_QUE_INCLUYEN_AMBOS.indexOf(norm(st)) >= 0; }
 
 function pasaSt(f){
   if(PE.status === 'TODOS') return true;
@@ -2297,13 +2594,29 @@ function pintarSemanas(){
     return Number(a) - Number(b);
   });
 
-  var h = chip('TODAS', 'TODAS', tot, PE.semana==='TODAS', 'filtrarSemana');
+  var hoySem = semanaDe(new Date());
+  var h = '<option value="TODAS"' + (PE.semana==='TODAS' ? ' selected' : '') + '>'
+        + 'Todas las semanas  (' + tot + ')</option>';
   for(var j=0;j<orden.length;j++){
     var s2 = orden[j];
-    h += chip(s2, (s2==='SIN FECHA' ? 'SIN FECHA' : 'S' + s2),
-              cuenta[s2], PE.semana===s2, 'filtrarSemana');
+    var txt = (s2 === 'SIN FECHA')
+      ? 'Sin fecha de despacho'
+      : 'Semana ' + s2 + (Number(s2) === hoySem ? '  · esta semana' : '');
+    h += '<option value="' + esc(s2) + '"' + (PE.semana===s2 ? ' selected' : '') + '>'
+       + esc(txt) + '  (' + cuenta[s2] + ')</option>';
   }
   document.getElementById('semanas').innerHTML = h;
+}
+
+/* El numero de semana, calculado igual que en el servidor, para marcar cual
+   es la de hoy en la lista. */
+function semanaDe(d){
+  // misma regla que el servidor: ISO 8601, como el calendario
+  var t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  var dia = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - dia);
+  var ini = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+  return Math.ceil(((t - ini) / 86400000 + 1) / 7);
 }
 
 /* Los status salen de los datos, no de una lista fija: si en el WIP hay un
@@ -2320,12 +2633,12 @@ function pintarStatus(){
       if(norm(s) === norm(ST_AMBOS)) ambos++;
     }
   }
-  /* X TELA y X MOLDE cuentan tambien los X TELA / MOLDE. Si hay de esos,
-     las dos opciones aparecen aunque no haya ninguno que espere solo una. */
+  /* X MOLDE cuenta tambien los X TELA / MOLDE. Si hay de esos, la opcion
+     aparece aunque no haya ninguno que espere solo molde. */
   var hayAmbos = false;
   for(var a0=0;a0<lista.length;a0++) if(norm(lista[a0]) === norm(ST_AMBOS)) hayAmbos = true;
   if(hayAmbos){
-    ['X TELA','X MOLDE'].forEach(function(x){
+    ST_QUE_INCLUYEN_AMBOS.forEach(function(x){
       var k = null;
       for(var a1=0;a1<lista.length;a1++) if(norm(lista[a1]) === x) k = lista[a1];
       if(k === null){ k = x; lista.push(k); cuenta[k] = 0; }
@@ -2637,26 +2950,9 @@ function invalidar(){ PE.filas = []; BQ.filas = []; }
 
 var FUERA_DEL_PROGRAMA = ['ENTREGADO','CANCELADO','X STAND BY','STAND BY'];
 
-/* Despues de registrar, la lista de atras se acomoda sola: si el estilo
-   salio del programa desaparece, y si cambio de etapa se actualiza el chip.
-   No hace falta recargar ni volver a leer el Sheet. */
-function refrescarLista(orden, nuevoStatus){
-  BQ.filas = [];                                  // el buscador se relee al entrar
-  if(!nuevoStatus){ pintarFiltros(); pintarPE(); return; }
-
-  for(var i=0;i<PE.filas.length;i++){
-    if(PE.filas[i].orden !== orden) continue;
-    if(FUERA_DEL_PROGRAMA.indexOf(norm(nuevoStatus)) !== -1) PE.filas.splice(i,1);
-    else PE.filas[i].status = nuevoStatus;
-    break;
-  }
-  pintarFiltros();
-  pintarPE();
-}
-
 /* Relee el programa del servidor sin perder los filtros que tenias puestos.
-   Se usa cuando el cambio afecta la fecha de despacho y hay que rearmar
-   las bandas: eso no se puede calcular aca. */
+   Lo llama refrescarTodo despues de cada cambio. (Antes, al registrar, solo
+   se cambiaba el status en la lista y lo demas quedaba viejo hasta recargar.) */
 function recargarPrograma(){
   var sem = PE.semana, st = PE.status;
   google.script.run
@@ -2665,14 +2961,42 @@ function recargarPrograma(){
       PE.filas  = r.filas || [];
       PE.hoyIso = r.hoyIso || '';
       PE.semana = sem; PE.status = st; PE.tope = PE_TOPE;
-      BQ.filas  = [];
       pintarFiltros();
       pintarPE();
       cargarNuevos();
       if(!AREA) cargarServicios();   // la confirmacion de servicio es de Desarrollo
+      if(!AREA) cargarSinFechaComercial();
     })
     .withFailureHandler(function(){})
     .getPorEntregar();
+}
+
+/* Despues de cualquier cambio (registrar, editar, confirmar, poner minutaje,
+   marcar una llegada) todo lo que se ve se vuelve a leer del Sheet en ese
+   momento: el programa con los filtros que tenias, las barras de aviso y, si
+   esta abierto, el buscador con lo que habias escrito. Asi el cambio se ve al
+   instante, sin apretar Actualizar. */
+function refrescarTodo(){
+  recargarPrograma();
+  var pb = document.getElementById('pBuscar');
+  if(pb && pb.style.display === 'block') recargarBuscar();
+  else BQ.filas = [];                         // se relee al entrar
+}
+
+function recargarBuscar(){
+  var st = document.getElementById('bqEstado').value;
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(!r || !r.ok) return;
+      BQ.filas   = r.filas || [];
+      BQ.estados = r.estados || [];
+      pintarEstadosBQ();
+      if(st) document.getElementById('bqEstado').value = st;   // se queda la fase elegida
+      if(BQ.modo !== 'entregados') avisoMinutaje();
+      pintarBQ();
+    })
+    .withFailureHandler(function(){})
+    .getTodos();
 }
 
 var LOGO = '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';
@@ -2731,7 +3055,7 @@ function avisoMinutaje(){
   b.innerHTML = '<button class="nuevos" onclick="verSinMinutaje()">'
     + '<div>&#9679; ' + t.join(' &middot; ')
     + '<br><span style="font-size:13px;color:#5f6368">'
-    + 'Solo los que siguen en proceso. Se completan abriendo el estilo &rarr; EDITAR.'
+    + 'Solo los que siguen en proceso. Se completan con el &#9881; de cada fila.'
     + '</span></div><div class="ir">VER</div></button>';
 }
 
@@ -2766,9 +3090,9 @@ function pintarBQ(){
     var h2 = '<div class="banda"><div>' + res2.length + ' estilo(s) por completar</div>'
            + '<div class="sub">' + r.falta.length + ' sin minutaje &middot; '
            + r.cero.length + ' en 0</div></div><div class="caja">';
-    for(var z=0;z<res2.length;z++) h2 += filaBQ(res2[z]);
-    h2 += '</div><div class="hint">Abre cada uno y ponle el minutaje en '
-        + '<b>EDITAR</b>. <button class="plano" style="margin-top:10px" '
+    for(var z=0;z<res2.length;z++) h2 += filaBQ(res2[z], true);
+    h2 += '</div><div class="hint">Ponle el minutaje con el &#9881; de su fila (o abriendolo &rarr; '
+        + '<b>EDITAR</b>). <button class="plano" style="margin-top:10px" '
         + 'onclick="salirSinMinutaje()">Volver a la busqueda</button></div>';
     c.innerHTML = h2;
     return;
@@ -2776,14 +3100,7 @@ function pintarBQ(){
 
   /* Regla 500: sin fase ni busqueda se ven las 500 ordenes mas nuevas; con filtro, todas las que cumplen. */
   var sinFiltroBQ = (st === 'TODAS' && t.length < 2);
-
-  var res = [];
-  for(var i=0;i<BQ.filas.length;i++){
-    var f = BQ.filas[i];
-    if(st !== 'TODAS' && f.status !== st) continue;
-    if(t.length >= 2 && f.busq.indexOf(t) === -1) continue;
-    res.push(f);
-  }
+  var res = filtradosBQ();
 
   if(!res.length){
     c.innerHTML = '<div class="aviso">'
@@ -2792,8 +3109,6 @@ function pintarBQ(){
     return;
   }
 
-  // la orden mas nueva arriba
-  res.sort(function(a,b){ return Number(b.orden) - Number(a.orden); });
   var tope = sinFiltroBQ ? res.slice(0, 500) : res;
 
   var h = '<div class="banda"><div>' + res.length
@@ -2806,9 +3121,138 @@ function pintarBQ(){
   c.innerHTML = h;
 }
 
+/* Cuantas tarjetas se dibujan de una vez. El Excel baja todo lo filtrado,
+   no solo lo dibujado. */
+var BQ_TOPE = 200;
+
+/* Lo que esta filtrado ahora: la lista de "por completar" si esta abierta, o
+   fase + busqueda. La orden mas nueva arriba. Es lo mismo que baja el Excel. */
+function filtradosBQ(){
+  if(BQ.soloSinMin){
+    var r = sinMinutaje(), res2 = r.falta.concat(r.cero);
+    res2.sort(function(a,b){ return Number(b.orden) - Number(a.orden); });
+    return res2;
+  }
+  var t = norm(document.getElementById('bqTexto').value);
+  var st = document.getElementById('bqEstado').value || 'TODAS';
+  var res = [];
+  for(var i=0;i<BQ.filas.length;i++){
+    var f = BQ.filas[i];
+    if(st !== 'TODAS' && f.status !== st) continue;
+    if(t.length >= 2 && f.busq.indexOf(t) === -1) continue;
+    res.push(f);
+  }
+  res.sort(function(a,b){ return Number(b.orden) - Number(a.orden); });
+  return res;
+}
+
 function salirSinMinutaje(){ BQ.soloSinMin = false; pintarBQ(); }
 
-function filaBQ(f){
+/* ---------- Excel del buscador ----------
+   Baja lo que esta filtrado (fase + busqueda, o la lista de "por completar"):
+   todas las columnas del WIP tal cual, y al final la fecha y hora en que se
+   registro cada etapa. El archivo se arma en el navegador con SheetJS; la
+   libreria se carga recien la primera vez que se aprieta el boton. */
+var XLSX_URL = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+
+function cargarSheetJS(cb){
+  if(window.XLSX) return cb();
+  var s = document.createElement('script');
+  s.src = XLSX_URL;
+  s.onload  = function(){ try { window.XLSX = window.XLSX; } catch(e) {} cb(); };
+  s.onerror = function(){ cb('No se pudo cargar la libreria de Excel. Revisa la conexion a internet.'); };
+  document.head.appendChild(s);
+}
+
+// 'aaaa-mm-dd' o 'aaaa-mm-dd hh:mm' -> numero de fecha de Excel. Se calcula a
+// mano para que la zona horaria del navegador no corra las horas.
+function serialExcel(txt){
+  var m = /^(\d{4})-(\d{2})-(\d{2})(?: (\d{2}):(\d{2}))?$/.exec(String(txt || ''));
+  if(!m) return null;
+  return (Date.UTC(+m[1], +m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0)) - Date.UTC(1899, 11, 30)) / 86400000;
+}
+
+function textoFiltroBQ(){
+  if(BQ.soloSinMin) return 'estilos sin minutaje o en 0';
+  var p = [];
+  var st = document.getElementById('bqEstado').value || 'TODAS';
+  if(st !== 'TODAS') p.push(st);
+  var t = document.getElementById('bqTexto').value.trim();
+  if(t.length >= 2) p.push('busqueda: ' + t);
+  return p.length ? p.join(' · ') : 'todo el WIP';
+}
+
+function descargarExcel(){
+  var lista = filtradosBQ();
+  if(!lista.length){ alert('No hay estilos con ese filtro.'); return; }
+  var btn = document.getElementById('btnExcel');
+  var etiqueta = btn.innerHTML;
+  btn.disabled = true; btn.textContent = 'Preparando ' + lista.length + '...';
+  var listo = function(){ btn.disabled = false; btn.innerHTML = etiqueta; };
+
+  cargarSheetJS(function(err){
+    if(err){ listo(); alert(err); return; }
+    google.script.run
+      .withSuccessHandler(function(r){
+        if(!r || !r.ok){ listo(); alert((r && r.msg) || 'No se pudo armar la base.'); return; }
+        try { armarExcel(r, lista.length); }
+        catch(e){ alert('No se pudo armar el archivo: ' + e.message); }
+        listo();
+      })
+      .withFailureHandler(function(e){ listo(); alert('Se corto la conexion: ' + e.message); })
+      .getBaseExport({ ordenes: lista.map(function(f){ return f.orden; }) });
+  });
+}
+
+function armarExcel(r, n){
+  var aoa = [r.encabezados];
+  for(var i=0;i<r.filas.length;i++) aoa.push(r.filas[i].slice());
+  var ws = XLSX.utils.aoa_to_sheet(aoa);
+
+  // las fechas pasan a ser fechas de Excel, para poder ordenar y filtrar
+  for(var c=0;c<r.tipos.length;c++){
+    var tp = r.tipos[c];
+    if(tp !== 'f' && tp !== 'fh') continue;
+    for(var f=1;f<aoa.length;f++){
+      var dir = XLSX.utils.encode_cell({ r:f, c:c });
+      var cel = ws[dir];
+      if(!cel || cel.t !== 's') continue;
+      var s = serialExcel(cel.v);
+      if(s === null) continue;
+      ws[dir] = { t:'n', v:s, z:(tp === 'fh' ? 'dd/mm/yyyy hh:mm' : 'dd/mm/yyyy') };
+    }
+  }
+  ws['!cols'] = r.encabezados.map(function(h, j){
+    var tp = r.tipos[j];
+    return { wch: tp === 'fh' ? 18 : (tp === 'f' ? 12 : Math.min(30, Math.max(10, String(h).length + 2))) };
+  });
+  ws['!autofilter'] = { ref: XLSX.utils.encode_range({ s:{ r:0, c:0 }, e:{ r:aoa.length - 1, c:r.encabezados.length - 1 } }) };
+
+  var info = XLSX.utils.aoa_to_sheet([
+    ['Dato', 'Detalle'],
+    ['Contenido', 'WIP MUESTRAS - base descargada del buscador'],
+    ['Filtro', textoFiltroBQ()],
+    ['Estilos', n],
+    ['Generado', r.generado + (usuario ? ' por ' + usuario : '')],
+    [],
+    ['Columnas del WIP', 'Las del WIP, menos las que se dejaron fuera. Las de fecha son la fecha del hecho (INGRESO TELA REAL, FINAL M, FINAL COR, FINAL COST, F. INICIAL DESPACHO).'],
+    ['Columnas que no se incluyen', (r.sinColumnas || []).join(', ')],
+    ['... REGISTRADA (fecha y hora)', 'Cuando se anoto esa etapa en el sistema, con hora (sale del historial). Si se registro dos veces, la ultima. Lo cargado antes de que existiera el sistema no la tiene.']
+  ]);
+  info['!cols'] = [{ wch:30 }, { wch:110 }];
+
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'BASE');
+  XLSX.utils.book_append_sheet(wb, info, 'INFO');
+
+  var hoy = hoyISO();
+  var nombre = 'WIP_' + (textoFiltroBQ() === 'todo el WIP' ? 'todo'
+                 : norm(textoFiltroBQ()).replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40))
+             + '_' + hoy + '.xlsx';
+  XLSX.writeFile(wb, nombre);
+}
+
+function filaBQ(f, conMinutaje){
   var abajo = [];
   if(f.cliente) abajo.push(f.cliente);
   if(f.grupo)   abajo.push(f.grupo);
@@ -2818,6 +3262,7 @@ function filaBQ(f){
 
   var l2 = '';
   for(var i=0;i<abajo.length;i++) l2 += '<span class="dt2">' + esc(abajo[i]) + '</span>';
+  l2 += fechasBQ(f);              // requerimiento y despacho, al costado de la talla
 
   return '<div class="est" onclick="verFicha(\'' + f.orden + '\')">'
     + '<div class="cuerpo">'
@@ -2828,18 +3273,131 @@ function filaBQ(f){
     +     (l2 ? '<div class="fl2">' + l2 + '</div>' : '')
     +   '</div>'
     +   '<div class="der">'
+    +     (conMinutaje
+          ? '<div class="num minCel" style="min-width:130px" onclick="event.stopPropagation()">'
+            + '<div class="qtye" style="margin:0 0 4px">minutaje</div>'
+            + '<div id="mnB_' + f.orden + '">' + minCelda('mnB_', f.orden, f.minutos) + '</div></div>'
+          : '')
     +     '<span class="chip st">' + esc(f.status) + '</span>'
     +     '<div class="num"><div class="qty">' + esc(f.cant) + '</div>'
-    +       '<div class="qtye">' + (f.xf ? esc(f.xf) : 'sin fecha') + '</div></div>'
+    +       '<div class="qtye">prendas</div></div>'
     +   '</div>'
     + '</div>'
     + '</div>';
 }
 
+/* Cuando entro el requerimiento y cuando se despacha, en la misma linea de
+   la talla. Si el despacho ya paso y el estilo sigue en proceso, la fecha va
+   en rojo. */
+function fechasBQ(f){
+  var tarde = f.vigente && f.xfIso && f.xfIso < hoyISO();
+  return '<span class="dt2 fch fch1">Requerimiento: <b>' + (f.freq ? esc(f.freq) : '&mdash;') + '</b></span>'
+       + '<span class="dt2 fch' + (tarde ? ' tarde' : '') + '">Fecha de despacho: <b>'
+       + (f.xf ? esc(f.xf) : '&mdash;') + '</b></span>';
+}
+
+/* ---------- minutaje en la misma fila ----------
+   El engranaje abre el campo y se convierte en check; el check guarda. Sirve
+   en la ventana de fechas sin confirmar y en la lista de "por completar" del
+   buscador. Se guarda igual que desde EDITAR, con su rastro en MOVIMIENTOS.
+   pref separa las dos pantallas: estan las dos en la pagina a la vez. */
+function minTiene(v){ return v !== '' && v !== null && v !== undefined && !isNaN(Number(v)); }
+
+function minCelda(pref, orden, valor){
+  var puede = !!(window.WM && WM.des) && !SOLO_VER;
+  return (minTiene(valor) ? '<b>' + esc(valor) + '</b>'
+                          : '<span style="color:var(--alerta)">falta</span>')
+       + (!puede ? '' : '<button class="engr" title="Poner el minutaje" '
+       +   'onclick="event.stopPropagation();minEditar(\'' + pref + '\',\'' + orden + '\')">&#9881;</button>');
+}
+
+function minValor(orden){
+  var listas = [(NUEVOS && NUEVOS.filas) || [], BQ.filas || [], PE.filas || []];
+  for(var a=0;a<listas.length;a++)
+    for(var i=0;i<listas[a].length;i++)
+      if(listas[a][i].orden === orden && minTiene(listas[a][i].minutos)) return listas[a][i].minutos;
+  return '';
+}
+
+function minEditar(pref, orden){
+  var c = document.getElementById(pref + orden);
+  if(!c) return;
+  c.innerHTML = '<input class="minIn" id="mi' + pref + orden + '" type="number" step="0.01" min="0"'
+    + ' inputmode="decimal" placeholder="min" value="' + esc(minValor(orden)) + '"'
+    + ' onclick="event.stopPropagation()"'
+    + ' onkeydown="minTecla(event,\'' + pref + '\',\'' + orden + '\')">'
+    + '<button class="engr ok" title="Guardar" '
+    +   'onclick="event.stopPropagation();minGuardar(this,\'' + pref + '\',\'' + orden + '\')">&#10003;</button>';
+  var i = document.getElementById('mi' + pref + orden);
+  if(i){ i.focus(); if(i.select) i.select(); }
+}
+
+function minTecla(ev, pref, orden){
+  if(ev.key === 'Enter'){
+    ev.preventDefault();
+    var b = document.querySelector('#' + pref + orden + ' button.engr');
+    if(b) minGuardar(b, pref, orden);
+  } else if(ev.key === 'Escape'){
+    var c = document.getElementById(pref + orden);
+    if(c) c.innerHTML = minCelda(pref, orden, minValor(orden));
+  }
+}
+
+function minGuardar(btn, pref, orden){
+  if(!usuario){ cambiarNombre(); if(!usuario) return; }
+  var i = document.getElementById('mi' + pref + orden);
+  var t = i ? String(i.value).trim().replace(',', '.') : '';
+  if(t === '' || isNaN(Number(t)) || Number(t) < 0){
+    alert('Pon el minutaje por prenda. Si todavia no se sabe, pon 0.');
+    if(i) i.focus();
+    return;
+  }
+  var p = { orden:orden, cambios:[{ campo:'MINUTOS', valor:t }], motivo:'', usuario:usuario };
+  p.token = tokenPara(btn, p);
+
+  btn.disabled = true; btn.innerHTML = '...';
+  var w = conEspera(btn, '\u2713',
+    function(r){
+      if(!r || !r.ok){ btn.disabled=false; btn.innerHTML='&#10003;'; alert(r && r.msg); return; }
+      minListo(orden, Number(t));
+    },
+    function(e){
+      btn.disabled=false; btn.innerHTML='&#10003;';
+      alert('Se corto la conexion: ' + e.message);
+    });
+  google.script.run.withSuccessHandler(w.ok).withFailureHandler(w.mal).editarEstilo(p);
+}
+
+/* Guardado: se pone el valor en las listas que ya estan cargadas, se vuelve a
+   pintar la celda con su engranaje, y en la ventana de fechas se habilita el
+   CONFIRMAR de esa fila. */
+function minListo(orden, valor){
+  var listas = [(NUEVOS && NUEVOS.filas) || [], BQ.filas || [], PE.filas || []];
+  for(var a=0;a<listas.length;a++)
+    for(var i=0;i<listas[a].length;i++)
+      if(listas[a][i].orden === orden) listas[a][i].minutos = valor;
+
+  ['mnN_','mnB_'].forEach(function(pref){
+    var c = document.getElementById(pref + orden);
+    if(c) c.innerHTML = minCelda(pref, orden, valor);
+  });
+
+  var b = document.getElementById('cf_' + orden);
+  if(b && b.disabled){
+    b.disabled = false;
+    b.textContent = 'CONFIRMAR';
+    b.title = '';
+    b.onclick = function(){ confirmar(b, orden); };
+  }
+  if(document.getElementById('bqAviso') && BQ.filas.length) avisoMinutaje();
+  if(PE.filas.length) verMinutaje(visibles());
+  refrescarTodo();
+}
+
 var tBQ = null;
 document.getElementById('bqTexto').addEventListener('input', function(){
   clearTimeout(tBQ);
-  tBQ = setTimeout(function(){ BQ.soloSinMin = false; pintarBQ(); }, 250);
+  tBQ = setTimeout(function(){ BQ.soloSinMin = false; BQ.tope = BQ_TOPE; pintarBQ(); }, 250);
 });
 
 /* Telas que llegan hoy. Solo cuenta los estilos donde ya pusiste la fecha:
@@ -3003,7 +3561,7 @@ function quitarLlegada(orden, texto){
   LLEG.filas = LLEG.filas.filter(function(x){ return x.orden !== orden; });
   var n = document.getElementById('llegN');
   if(n) n.textContent = LLEG.filas.length ? LLEG.filas.length + ' estilo(s) esperando' : 'Todo al dia';
-  recargarPrograma();
+  refrescarTodo();
   if(!LLEG.filas.length) setTimeout(cerrarFicha, 1200);
 }
 
@@ -3043,8 +3601,23 @@ var AREAS = {
     seg:{ n:'Programa<br>WIP', s:'Solo ver, sin registrar', ir:'wip' },
     buscar:'Buscar entre los estilos que llevan servicio',
     hecho:'Servicio registrado', fecha:'Fecha',
-    soloServicio:true }
+    soloServicio:true },
+  // Seguimiento de protos: no tiene menu ni registra; se abre directo en su lista
+  comercial: { nombre:'SEGUIMIENTO DE PROTOS', comercial:true },
+  // Seguimiento de moldes: ve la ruta completa y comenta los moldes pendientes
+  moldes:    { nombre:'SEGUIMIENTO DE MOLDES', moldes:true, coment:'MOLDE', rutaCompleta:true },
+  // Ingenieria: ingresa sus requerimientos de Mock Up Ingenieria con el formulario de Desarrollo
+  ingenieria:{ nombre:'INGENIERIA', ingenieria:true }
 };
+var FASE_INGENIERIA = 'Mock Up Ingenieria';
+
+function abrirIngenieria(){
+  ocultarTodo();
+  document.getElementById('pDesarrollo').style.display = 'block';
+  document.getElementById('btnAtras').style.display = 'none';
+  titulo('INGENIERIA', 'Requerimientos de Mock Up Ingenieria');
+  cargarFormDes();
+}
 
 /* Un estilo es de la pantalla de servicio si tiene servicio marcado, no es
    el 'NO' y no es servicio de costura, que lo sigue manejando Desarrollo. */
@@ -3144,6 +3717,7 @@ function abrirEntregados(){
   document.getElementById('pBuscar').style.display = 'block';
   document.getElementById('btnAtras').style.display = 'block';
   document.getElementById('bqFaseCel').style.display = 'none';
+  document.getElementById('btnExcel').style.display = 'none';   // inspeccion solo consulta
   document.getElementById('bqAviso').innerHTML = '';
   document.getElementById('bqTexto').value = '';
   titulo('ESTILOS ENTREGADOS', 'Solo para consultar');
@@ -3236,8 +3810,8 @@ function abrirArea(){
   cargarArea();
 }
 
-function cargarArea(){
-  document.getElementById('arLista').innerHTML =
+function cargarArea(silencioso){
+  if(!silencioso) document.getElementById('arLista').innerHTML =
     '<div class="cargando">Cargando los estilos...</div>';
   google.script.run
     .withSuccessHandler(function(r){
@@ -3266,26 +3840,83 @@ function cargarArea(){
 
 /* Costura: arriba de la lista, los estilos cuyos avios llegan hoy y los que
    ya debian haber llegado. Solo los que tienen fecha puesta y no llegaron. */
+/* Costura: los avisos de avios son botones, como los de Desarrollo. Al
+   tocarlos se abre la lista de los estilos con su color, para saber que
+   estilos y que colores estan esperando avios (hilos). Solo para mirar: la
+   llegada la registra Desarrollo. */
+var AVA = { hoy:[], tarde:[] };
+
 function avisoAviosArea(){
   var b = document.getElementById('arAvios');
   if(!b) return;
   var a = AREAS[AREA];
   if(!a || !a.avios){ b.innerHTML = ''; return; }
-  var hoyA = AR.hoyIso || hoyISO(), hoy = [], tarde = [];
+  var hoyA = AR.hoyIso || hoyISO();
+  AVA = { hoy:[], tarde:[] };
   for(var i=0;i<AR.filas.length;i++){
     var f = AR.filas[i];
     if(!f.aviosIso) continue;
-    if(f.aviosIso === hoyA) hoy.push(f.lives);
-    else if(f.aviosIso < hoyA) tarde.push(f.lives);
+    if(f.aviosIso === hoyA) AVA.hoy.push(f);
+    else if(f.aviosIso < hoyA) AVA.tarde.push(f);
   }
-  if(!hoy.length && !tarde.length){ b.innerHTML = ''; return; }
-  b.innerHTML = '<div class="aviso" style="font-size:15px">'
-    + (hoy.length ? '&#9679; <b>Hoy llegan los avios de ' + hoy.length + ' estilo(s):</b> '
-                    + esc(hoy.join(', ')) : '')
-    + (hoy.length && tarde.length ? '<br>' : '')
-    + (tarde.length ? '&#9679; <b>' + tarde.length + ' estilo(s) con avios atrasados:</b> '
-                    + esc(tarde.join(', ')) : '')
-    + '</div>';
+  var barra = function(tipo, t){
+    var pr = 0;
+    for(var k=0;k<t.length;k++) if(typeof t[k].cant === 'number') pr += t[k].cant;
+    return '<button class="nuevos' + (tipo === 'tarde' ? ' tarde' : '') + '" onclick="verAviosArea(\'' + tipo + '\')">'
+      + '<div>&#9679; <b>' + t.length + ' estilo(s) con avios '
+      + (tipo === 'hoy' ? 'que llegan hoy' : 'atrasados') + '</b>'
+      + '<br><span style="font-size:13px;color:#5f6368">' + pr + ' prenda(s). '
+      + (tipo === 'hoy' ? 'Toca VER para ver los estilos y sus colores.'
+                        : 'Se esperaban antes de hoy y todavia no llegan. Toca VER para ver estilos y colores.')
+      + '</span></div><div class="ir">VER</div></button>';
+  };
+  b.innerHTML = (AVA.hoy.length ? barra('hoy', AVA.hoy) : '')
+              + (AVA.tarde.length ? barra('tarde', AVA.tarde) : '');
+}
+
+function verAviosArea(tipo){
+  var t = (AVA[tipo] || []).slice();
+  if(!t.length) return;
+  // por estilo y, dentro del estilo, por color: asi se lee que colores faltan
+  t.sort(function(a, b){
+    if(a.lives !== b.lives) return a.lives < b.lives ? -1 : 1;
+    return String(a.combo || '') < String(b.combo || '') ? -1 : 1;
+  });
+  var pr = 0, hoyA = AR.hoyIso || hoyISO();
+  for(var k=0;k<t.length;k++) if(typeof t[k].cant === 'number') pr += t[k].cant;
+
+  var h = '<div class="fondo"><div class="ficha" style="max-width:1000px">'
+    + '<div class="fcab"><div class="fci">'
+    +   '<div class="fl">' + (tipo === 'hoy' ? 'Avios que llegan hoy' : 'Avios atrasados') + '</div>'
+    +   '<div class="fd">' + t.length + ' estilo(s) &middot; ' + pr + ' prenda(s) esperando</div>'
+    + '</div><button class="cerrar" onclick="cerrarFicha()">&#10005;</button></div>'
+    + '<div class="fcuerpo"><div class="caja">';
+  for(var i=0;i<t.length;i++){
+    var f = t[i];
+    var dias = Math.round((new Date(hoyA + 'T00:00:00') - new Date(f.aviosIso + 'T00:00:00')) / 86400000);
+    h += '<div class="est" onclick="cerrarFicha();verFicha(\'' + f.orden + '\')">'
+      + '<div class="cuerpo">'
+      +   '<div class="izq">'
+      +     '<div class="fl1"><span class="liv">' + esc(f.lives) + '</span>'
+      +       (f.fase ? '<span class="dt1">' + esc(f.fase) + '</span>' : '') + '</div>'
+      +     '<div class="fl2">'
+      +       '<span class="dt2">Color <b class="col">' + esc(f.combo || '-') + '</b></span>'
+      +       (f.cliente ? '<span class="dt2">' + esc(f.cliente) + '</span>' : '')
+      +       (f.codigo  ? '<span class="dt2">' + esc(f.codigo)  + '</span>' : '')
+      +       (f.talla   ? '<span class="dt2">Talla ' + esc(f.talla) + '</span>' : '')
+      +     '</div>'
+      +   '</div>'
+      +   '<div class="der">'
+      +     (tipo === 'hoy'
+             ? '<span class="chip avh">Llegan hoy</span>'
+             : '<span class="chip avt">Se esperaban el ' + esc(f.avios) + ' &middot; ' + dias + 'd tarde</span>')
+      +     '<div class="num"><div class="qty">' + esc(f.cant) + '</div><div class="qtye">prendas</div></div>'
+      +   '</div>'
+      + '</div></div>';
+  }
+  h += '</div><div class="hint">Desarrollo registra cuando llegan. Toca un estilo para ver su ficha.</div>'
+     + '</div></div></div>';
+  abrirModal(h);
 }
 
 function pintarArea(){
@@ -3462,6 +4093,438 @@ document.getElementById('arTexto').addEventListener('input', function(){
   tAR = setTimeout(pintarArea, 250);
 });
 
+/* ================== SEGUIMIENTO DE PROTOS (Comercial) ==================
+   Comercial ve sus estilos con la fecha que Desarrollo le dio (nunca la del
+   WIP). Hasta que se la dan, sale "fecha por confirmar". Solo para mirar: al
+   tocar un estilo ve su avance (corte, costura, inspeccion) y los cambios de
+   su fecha con el motivo. */
+var CO = { filas:[], tope:0 };
+var CO_TOPE = 150;
+
+function abrirComercial(){
+  ocultarTodo();
+  SOLO_VER = true;
+  document.getElementById('pComercial').style.display = 'block';
+  document.getElementById('btnAtras').style.display = 'none';
+  titulo('SEGUIMIENTO DE PROTOS', 'Lo que pidio Comercial y como va');
+  cargarComercial();
+}
+
+function cargarComercial(){
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(!r || !r.ok){ document.getElementById('coLista').innerHTML = '<div class="error">' + esc(r && r.msg) + '</div>'; return; }
+      CO.filas = r.filas || [];
+      CO.tope = CO_TOPE;
+      pintarFiltrosComercial();
+      pintarComercial();
+    })
+    .withFailureHandler(function(e){
+      document.getElementById('coLista').innerHTML = '<div class="error">No se pudo cargar: ' + esc(e.message) + '</div>';
+    })
+    .getSeguimiento();
+}
+
+function pintarFiltrosComercial(){
+  var cli = {}, st = {};
+  for(var i=0;i<CO.filas.length;i++){
+    var f = CO.filas[i];
+    cli[f.cliente] = (cli[f.cliente] || 0) + 1;
+    st[f.status]   = (st[f.status] || 0) + 1;
+  }
+  var opc = function(id, mapa, todos){
+    var sel = document.getElementById(id), actual = sel.value || 'TODOS';
+    var ks = Object.keys(mapa).sort();
+    var h = '<option value="TODOS">' + todos + '  (' + CO.filas.length + ')</option>';
+    for(var k=0;k<ks.length;k++)
+      h += '<option value="' + esc(ks[k]) + '"' + (ks[k] === actual ? ' selected' : '') + '>'
+         + esc(ks[k] || '(sin dato)') + '  (' + mapa[ks[k]] + ')</option>';
+    sel.innerHTML = h;
+  };
+  opc('coCliente', cli, 'Todos los clientes');
+  opc('coStatus', st, 'Todos los status');
+}
+
+function filtradosComercial(){
+  var cl = document.getElementById('coCliente').value || 'TODOS';
+  var st = document.getElementById('coStatus').value || 'TODOS';
+  var t = norm(document.getElementById('coTexto').value);
+  return CO.filas.filter(function(f){
+    if(cl !== 'TODOS' && f.cliente !== cl) return false;
+    if(st !== 'TODOS' && f.status !== st) return false;
+    if(t.length >= 2 && f.busq.indexOf(t) === -1) return false;
+    return true;
+  });
+}
+
+/* Primero los que tienen fecha, por fecha de entrega; al final los que todavia
+   no tienen fecha confirmada. Una banda por dia, como el programa. */
+function pintarComercial(){
+  var lista = filtradosComercial();
+  document.getElementById('coV').textContent = lista.length;
+  var c = document.getElementById('coLista');
+  if(!lista.length){ c.innerHTML = '<div class="aviso">No hay estilos con ese filtro.</div>'; return; }
+  lista.sort(function(a, b){
+    var x = a.comIso || '9999', y = b.comIso || '9999';
+    if(x !== y) return x < y ? -1 : 1;
+    if(a.cliente !== b.cliente) return a.cliente < b.cliente ? -1 : 1;
+    return a.lives < b.lives ? -1 : 1;
+  });
+  var pinta = lista.slice(0, CO.tope || CO_TOPE);
+  var h = '', clave = null, buffer = '', cab = '', hoyC = hoyISO();
+  var cerrar = function(){ if(clave === null) return; h += cab + '<div class="caja">' + buffer + '</div>'; buffer = ''; };
+  for(var i=0;i<pinta.length;i++){
+    var f = pinta[i], k = f.comIso || '';
+    if(k !== clave){
+      cerrar(); clave = k;
+      var n = 0, pr = 0;
+      for(var z=i; z<lista.length && (lista[z].comIso || '') === k; z++){ n++; if(typeof lista[z].cant === 'number') pr += lista[z].cant; }
+      cab = '<div class="banda' + (!k ? ' nada' : (k < hoyC ? ' vieja' : '')) + '"><div>'
+          + (k ? 'Entrega ' + esc(f.dia) + ' ' + esc(f.fechaCom) : 'FECHA POR CONFIRMAR') + '</div>'
+          + '<div class="sub">' + n + ' estilo' + (n === 1 ? '' : 's') + ' &middot; ' + pr + ' prendas</div></div>';
+    }
+    buffer += filaComercial(f);
+  }
+  cerrar();
+  if(lista.length > pinta.length){
+    var faltan = lista.length - pinta.length;
+    h += '<button class="plano" onclick="CO.tope += CO_TOPE; pintarComercial()" style="font-weight:bold;padding:18px">'
+       + 'VER MAS &nbsp;&middot;&nbsp; faltan ' + faltan + '</button>';
+  }
+  c.innerHTML = h;
+}
+
+function filaComercial(f){
+  var abajo = [];
+  if(f.estcli) abajo.push(f.estcli);
+  if(f.cliente) abajo.push(f.cliente);
+  if(f.combo) abajo.push(f.combo);
+  if(f.talla) abajo.push('Talla ' + f.talla);
+  var l2 = '';
+  for(var i=0;i<abajo.length;i++) l2 += '<span class="dt2">' + esc(abajo[i]) + '</span>';
+  // cuando lo pidieron, igual que en la Busqueda de estilos
+  l2 += '<span class="dt2 fch fch1">Requerimiento: <b>' + (f.freq ? esc(f.freq) : '&mdash;') + '</b></span>';
+  return '<div class="est" onclick="verFichaComercial(\'' + f.orden + '\')">'
+    + '<div class="cuerpo">'
+    +   '<div class="izq">'
+    +     '<div class="fl1"><span class="liv">' + esc(f.lives) + '</span>'
+    +       (f.fase ? '<span class="dt1">' + esc(f.fase) + '</span>' : '') + '</div>'
+    +     (l2 ? '<div class="fl2">' + l2 + '</div>' : '')
+    +   '</div>'
+    +   '<div class="der">'
+    /* la fecha de entrega ya esta en la banda de arriba (verde, o roja si ya
+       paso): en la tarjeta no se repite */
+    +     (f.cambiada ? '<span class="chip fcc">Fecha cambiada</span>' : '')
+    +     '<span class="chip st">' + esc(f.status) + '</span>'
+    +     '<div class="num"><div class="qty">' + esc(f.cant) + '</div><div class="qtye">prendas</div></div>'
+    +   '</div>'
+    + '</div></div>';
+}
+
+function verFichaComercial(orden){
+  abrirModal('<div class="fondo"><div class="ficha"><div class="fcuerpo"><div class="cargando">Cargando el estilo...</div></div></div></div>');
+  google.script.run
+    .withSuccessHandler(function(d){
+      if(!d || !d.ok){ cerrarFicha(); alert(d && d.msg); return; }
+      var h = '<div class="fondo"><div class="ficha">'
+        + '<div class="fcab">'
+        +   '<div class="fci">'
+        +     '<div class="fl">' + esc(d.lives) + '</div>'
+        +     '<div class="fd">' + esc(d.cliente) + ' &middot; ' + esc(d.grupo)
+        +       (d.freq ? ' &middot; Req: <b>' + esc(d.freq) + '</b>' : '')
+        +       (d.estcli ? ' &middot; Estilo cliente <b>' + esc(d.estcli) + '</b>' : '') + '<br>'
+        +       esc(d.fase) + ' &middot; ' + esc(d.combo) + ' &middot; ' + esc(d.cant) + ' prendas &middot; Talla ' + esc(d.talla)
+        +     '</div>'
+        +   '</div>'
+        +   '<div class="fdest">'
+        +     '<div class="fdfila"><div class="fdi' + (d.fechaCom ? '' : ' mal') + '"><div class="fdl">Entrega</div>'
+        +       '<div class="fdv">' + (d.fechaCom ? esc(d.fechaCom) : 'POR CONFIRMAR') + '</div></div></div>'
+        +     '<div class="fdfila"><div class="fdi"><div class="fdl">Status</div>'
+        +       '<div class="fdv">' + esc(d.status) + '</div></div></div>'
+        +   '</div>'
+        +   '<button class="cerrar" onclick="cerrarFicha()">&#10005;</button>'
+        + '</div><div class="fcuerpo">'
+        +   '<div class="rot">Como va</div>' + htmlRuta(d.ruta || [])
+        +   (d.fechaCom ? '' : '<div class="hint">Desarrollo todavia no confirma la fecha de entrega de este estilo.</div>')
+        + '</div></div></div>';
+      abrirModal(h);
+    })
+    .withFailureHandler(function(e){ cerrarFicha(); alert('No se pudo abrir: ' + e.message); })
+    .getFichaComercial(orden);
+}
+
+var tCO = null;
+document.getElementById('coTexto').addEventListener('input', function(){
+  clearTimeout(tCO);
+  tCO = setTimeout(function(){ CO.tope = CO_TOPE; pintarComercial(); }, 250);
+});
+
+/* ---------- estilos sin fecha para Comercial ----------
+   Los que ya tienen confirmada la fecha del WIP pero todavia no tienen la de
+   Comercial (todos los de antes de esta pestaña). Comercial los ve como "fecha
+   por confirmar" hasta que se la des aca. La primera vez no pide motivo. */
+var SFC = null;
+function cargarSinFechaComercial(){
+  google.script.run
+    .withSuccessHandler(function(r){
+      var b = document.getElementById('barraComercial');
+      if(!b) return;
+      SFC = r;
+      pintarBarraPend();
+    })
+    .withFailureHandler(function(){})
+    .getSinFechaComercial();
+}
+
+function verSinFechaComercial(){ return verNuevos(); }
+function verSinFechaComercialAntes(){
+  if(!SFC || !SFC.filas.length) return;
+  var f = SFC.filas;
+  var h = '<div class="fondo"><div class="ficha" style="max-width:1150px">'
+    + '<div class="fcab"><div class="fci">'
+    +   '<div class="fl">Estilos sin fecha para Comercial</div>'
+    +   '<div class="fd" id="sfcN">' + f.length + ' por asignar</div>'
+    + '</div><button class="cerrar" onclick="cerrarFicha()">&#10005;</button></div>'
+    + '<div class="fcuerpo"><div class="scroll"><table class="fnew"><tr>'
+    + '<th>ORDEN</th><th>ESTILO</th><th>CLIENTE</th><th>FASE</th><th>CANT</th><th>STATUS</th>'
+    + '<th>DESPACHO WIP</th><th>PARA COMERCIAL</th><th></th></tr>';
+  for(var i=0;i<f.length;i++){
+    var x = f[i];
+    h += '<tr id="sfc_' + x.orden + '">'
+      + '<td><b>' + esc(x.orden) + '</b></td>'
+      + '<td><b>' + esc(x.lives) + '</b><br><span style="font-size:11px;color:#5f6368">' + esc(x.combo) + '</span></td>'
+      + '<td>' + esc(x.cliente) + '<br><span style="font-size:11px;color:#5f6368">' + esc(x.grupo) + '</span></td>'
+      + '<td>' + esc(x.fase) + '</td>'
+      + '<td>' + esc(x.cant) + '<br><span style="font-size:11px;color:#5f6368">T ' + esc(x.talla) + '</span></td>'
+      + '<td>' + esc(x.status) + '</td>'
+      + '<td>' + esc(x.xf || 'sin fecha') + '</td>'
+      + '<td><input type="date" class="fcom" id="sfx_' + x.orden + '" value="' + esc(x.iso) + '"></td>'
+      + '<td><button onclick="asignarFechaCom(this,\'' + x.orden + '\',\'' + esc(x.iso) + '\')">ASIGNAR</button></td>'
+      + '</tr>';
+  }
+  h += '</table></div><div class="hint">Viene propuesta la fecha del WIP. Si a Comercial le diste otra '
+     + '(por ejemplo, la que mandaste por correo), ponla aqui: puede ser igual o despues, nunca antes. '
+     + 'Al asignarla, Comercial la ve en Seguimiento de protos.</div></div></div></div>';
+  abrirModal(h);
+}
+
+function asignarFechaCom(btn, orden, isoWip){
+  if(!usuario){ cambiarNombre(); if(!usuario) return; }
+  var inp = document.getElementById('sfx_' + orden);
+  var v = inp ? inp.value : '';
+  if(!v){ alert('Pon la fecha para Comercial.'); return; }
+  if(isoWip && v < isoWip){
+    alert('La fecha para Comercial no puede ser antes que la fecha del WIP.\n\nTiene que ser igual o despues.');
+    inp.focus(); return;
+  }
+  var p = { orden:orden, cambios:[{ campo:'FECHA_COM', valor:v }], motivo:'', usuario:usuario };
+  p.token = tokenPara(btn, p);
+  btn.disabled = true; btn.textContent = '...';
+  var w = conEspera(btn, 'REINTENTAR',
+    function(r){
+      if(!r || !r.ok){ btn.disabled=false; btn.textContent='REINTENTAR'; alert(r && r.msg); return; }
+      var tr = document.getElementById('sfc_' + orden);
+      if(tr) tr.style.display = 'none';
+      SFC.filas = SFC.filas.filter(function(x){ return x.orden !== orden; });
+      contarPend();
+      refrescarTodo();
+    },
+    function(e){ btn.disabled=false; btn.textContent='REINTENTAR'; alert('Se corto la conexion: ' + e.message); });
+  google.script.run.withSuccessHandler(w.ok).withFailureHandler(w.mal).editarEstilo(p);
+}
+
+/* ================== SEGUIMIENTO DE MOLDES ==================
+   Para el area de moldes. El molde se entrega en 2 dias habiles desde la
+   fecha de requerimiento; si se pasa, sale el aviso arriba. Pendientes (X
+   MOLDE y X TELA / MOLDE) primero, los mas atrasados arriba; despues los
+   entregados, el ultimo entregado primero. Al tocar un estilo se ve su
+   historial completo, y en los pendientes se puede dejar un comentario de
+   molde, que Desarrollo ve en su ficha. */
+var MO = { filas:[], tope:0, plazo:2 };
+var MO_TOPE = 200;
+
+function abrirMoldes(){
+  ocultarTodo();
+  SOLO_VER = false;
+  document.getElementById('pMoldes').style.display = 'block';
+  document.getElementById('btnAtras').style.display = 'none';
+  titulo('SEGUIMIENTO DE MOLDES', 'Moldes pendientes y entregados');
+  cargarMoldes();
+}
+
+function cargarMoldes(){
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(!r || !r.ok){ document.getElementById('moLista').innerHTML = '<div class="error">' + esc(r && r.msg) + '</div>'; return; }
+      MO.filas = r.filas || [];
+      MO.plazo = r.plazo || 2;
+      if(!MO.tope) MO.tope = MO_TOPE;
+      pintarFiltrosMoldes();
+      avisoMoldes();
+      pintarMoldes();
+    })
+    .withFailureHandler(function(e){
+      document.getElementById('moLista').innerHTML = '<div class="error">No se pudo cargar: ' + esc(e.message) + '</div>';
+    })
+    .getSeguimientoMoldes();
+}
+
+function moldePendiente(d){
+  var s = norm(d.status);
+  return !d.molde && (s === 'X MOLDE' || s === 'X TELA / MOLDE');
+}
+
+function pintarFiltrosMoldes(){
+  var cli = {}, np = 0, ne = 0;
+  for(var i=0;i<MO.filas.length;i++){
+    var f = MO.filas[i];
+    cli[f.cliente] = (cli[f.cliente] || 0) + 1;
+    if(f.pendiente) np++; else ne++;
+  }
+  var sc = document.getElementById('moCliente'), ac = sc.value || 'TODOS';
+  var ks = Object.keys(cli).sort();
+  var h = '<option value="TODOS">Todos los clientes  (' + MO.filas.length + ')</option>';
+  for(var k=0;k<ks.length;k++)
+    h += '<option value="' + esc(ks[k]) + '"' + (ks[k] === ac ? ' selected' : '') + '>' + esc(ks[k] || '(sin cliente)') + '  (' + cli[ks[k]] + ')</option>';
+  sc.innerHTML = h;
+  var se = document.getElementById('moEstado'), ae = se.value || 'TODOS';
+  se.innerHTML = '<option value="TODOS"' + (ae === 'TODOS' ? ' selected' : '') + '>Todos  (' + MO.filas.length + ')</option>'
+    + '<option value="PENDIENTES"' + (ae === 'PENDIENTES' ? ' selected' : '') + '>Pendientes por entregar  (' + np + ')</option>'
+    + '<option value="ENTREGADOS"' + (ae === 'ENTREGADOS' ? ' selected' : '') + '>Moldes entregados  (' + ne + ')</option>';
+}
+
+function filtradosMoldes(){
+  var cl = document.getElementById('moCliente').value || 'TODOS';
+  var es = document.getElementById('moEstado').value || 'TODOS';
+  var t = norm(document.getElementById('moTexto').value);
+  var res = MO.filas.filter(function(f){
+    if(cl !== 'TODOS' && f.cliente !== cl) return false;
+    if(es === 'PENDIENTES' && !f.pendiente) return false;
+    if(es === 'ENTREGADOS' && f.pendiente) return false;
+    if(t.length >= 2 && f.busq.indexOf(t) === -1) return false;
+    return true;
+  });
+  res.sort(function(a, b){
+    if(a.pendiente !== b.pendiente) return a.pendiente ? -1 : 1;
+    if(a.pendiente){
+      if(a.atraso !== b.atraso) return b.atraso - a.atraso;              // los mas atrasados arriba
+      return (a.limiteIso || '9999') < (b.limiteIso || '9999') ? -1 : 1; // despues, el que vence antes
+    }
+    if((a.moldeIso || '') !== (b.moldeIso || '')) return (a.moldeIso || '') < (b.moldeIso || '') ? 1 : -1;
+    return Number(b.orden) - Number(a.orden);
+  });
+  return res;
+}
+
+function pintarMoldes(){
+  var lista = filtradosMoldes();
+  document.getElementById('moV').textContent = lista.length;
+  var c = document.getElementById('moLista');
+  if(!lista.length){ c.innerHTML = '<div class="aviso">No hay estilos con ese filtro.</div>'; return; }
+  var pinta = lista.slice(0, MO.tope || MO_TOPE);
+  var np = lista.filter(function(f){ return f.pendiente; }).length;
+  var h = '', abierto = null;
+  for(var i=0;i<pinta.length;i++){
+    var f = pinta[i];
+    if(f.pendiente !== abierto){
+      if(abierto !== null) h += '</div>';
+      abierto = f.pendiente;
+      var n = f.pendiente ? np : lista.length - np;
+      h += '<div class="banda' + (f.pendiente ? '' : ' nada') + '"><div>'
+         + (f.pendiente ? 'MOLDES PENDIENTES POR ENTREGAR' : 'MOLDES ENTREGADOS') + '</div>'
+         + '<div class="sub">' + n + ' estilo' + (n === 1 ? '' : 's')
+         + (f.pendiente ? ' &middot; plazo ' + MO.plazo + ' dias habiles desde el requerimiento' : '') + '</div></div>'
+         + '<div class="caja">';
+    }
+    h += filaMolde(f);
+  }
+  h += '</div>';
+  if(lista.length > pinta.length){
+    var faltan = lista.length - pinta.length;
+    h += '<button class="plano" onclick="MO.tope += MO_TOPE; pintarMoldes()" style="font-weight:bold;padding:18px">'
+       + 'VER MAS &nbsp;&middot;&nbsp; faltan ' + faltan + '</button>';
+  }
+  c.innerHTML = h;
+}
+
+function filaMolde(f){
+  var abajo = [];
+  if(f.cliente) abajo.push(f.cliente);
+  if(f.codigo)  abajo.push(f.codigo);
+  if(f.combo)   abajo.push(f.combo);
+  if(f.talla)   abajo.push('Talla ' + f.talla);
+  var l2 = '';
+  for(var i=0;i<abajo.length;i++) l2 += '<span class="dt2">' + esc(abajo[i]) + '</span>';
+  l2 += fechasBQ(f);     // Requerimiento y Fecha de despacho al costado de la talla, igual que en el buscador
+
+  var estado;
+  if(f.pendiente){
+    if(f.atraso > 0)  estado = '<span class="chip at">Atrasado ' + f.atraso + ' dia' + (f.atraso === 1 ? '' : 's') + '</span>';
+    else if(f.limite) estado = '<span class="chip st">Molde vence ' + esc(f.limite) + '</span>';
+    else              estado = '<span class="chip fcp">Sin fecha de requerimiento</span>';
+  } else {
+    estado = f.molde ? '<span class="chip qn">Entregado el ' + esc(f.molde) + '</span>'
+                     : '<span class="chip fcp">Entregado &middot; sin fecha registrada</span>';
+  }
+  return '<div class="est" onclick="verFicha(\'' + f.orden + '\')">'
+    + '<div class="cuerpo">'
+    +   '<div class="izq">'
+    +     '<div class="fl1"><span class="liv">' + esc(f.lives) + '</span>'
+    +       (f.fase ? '<span class="dt1">' + esc(f.fase) + '</span>' : '') + '</div>'
+    +     '<div class="fl2">' + l2 + '</div>'
+    +   '</div>'
+    +   '<div class="der">'
+    +     (f.comentarios ? '<span class="chip" title="Comentarios de molde">&#128172; ' + f.comentarios + '</span>' : '')
+    +     estado
+    +     '<span class="chip st">' + esc(f.status) + '</span>'
+    +     '<div class="num"><div class="qty">' + esc(f.cant) + '</div><div class="qtye">prendas</div></div>'
+    +   '</div>'
+    + '</div></div>';
+}
+
+/* El aviso de arriba: moldes que ya pasaron su plazo. Como las otras
+   notificaciones, con VER para ver cuales son. */
+function avisoMoldes(){
+  var b = document.getElementById('moAviso');
+  var atr = MO.filas.filter(function(f){ return f.pendiente && f.atraso > 0; });
+  if(!atr.length){ b.innerHTML = ''; return; }
+  b.innerHTML = '<button class="nuevos tarde" onclick="verMoldesAtrasados()">'
+    + '<div>&#9679; <b>' + atr.length + ' molde(s) estan tomando mas tiempo</b>'
+    + '<br><span style="font-size:13px;color:#5f6368">Pasaron los ' + MO.plazo
+    + ' dias habiles desde el requerimiento y todavia no se entregan.</span></div>'
+    + '<div class="ir">VER</div></button>';
+}
+
+function verMoldesAtrasados(){
+  var atr = MO.filas.filter(function(f){ return f.pendiente && f.atraso > 0; })
+                    .sort(function(a, b){ return b.atraso - a.atraso; });
+  if(!atr.length) return;
+  var h = '<div class="fondo"><div class="ficha" style="max-width:1000px">'
+    + '<div class="fcab"><div class="fci">'
+    +   '<div class="fl">Moldes que estan tomando mas tiempo</div>'
+    +   '<div class="fd">' + atr.length + ' estilo(s) &middot; plazo ' + MO.plazo + ' dias habiles desde el requerimiento</div>'
+    + '</div><button class="cerrar" onclick="cerrarFicha()">&#10005;</button></div>'
+    + '<div class="fcuerpo"><div class="caja">';
+  for(var i=0;i<atr.length;i++) h += filaMolde(atr[i]).replace('onclick="verFicha(', 'onclick="cerrarFicha();verFicha(');
+  h += '</div><div class="hint">Toca un estilo para ver su historial y dejar un comentario.</div></div></div></div>';
+  abrirModal(h);
+}
+
+// el comentario de molde: el mismo de siempre, que se guarda en la etapa MOLDE
+function comentarioMolde(){
+  document.getElementById('fcuerpo').innerHTML =
+      '<div class="rot">Comentario de molde</div><div id="detReg"></div>'
+    + '<div class="fbtns"><button class="bEdi" onclick="volverFicha()">Cancelar</button></div>';
+  REG = { que:'' };
+  elegir('COMENT');
+}
+
+var tMO = null;
+document.getElementById('moTexto').addEventListener('input', function(){
+  clearTimeout(tMO);
+  tMO = setTimeout(function(){ MO.tope = MO_TOPE; pintarMoldes(); }, 250);
+});
+
 /* ================== ULTIMOS ESTILOS AGREGADOS ================== */
 var NUEVOS = null;
 
@@ -3481,7 +4544,7 @@ function cargarServicios(){
       if(r.sinColumna || r.sinTabla){
         b.innerHTML = '<div class="aviso">La confirmacion de servicio todavia no esta activada: '
           + 'falta ' + (r.sinColumna ? 'la columna <b>SERVICIO</b> en el WIP'
-                                     : 'la tabla de clientes en <b>ERORRES</b>')
+                                     : 'la tabla de clientes')
           + '.<br>Avisa a Christian '
           + 'y recarga con Ctrl+Shift+R.</div>';
         SERVICIOS_CONF = null;
@@ -3564,7 +4627,7 @@ function confirmarSrv(btn, orden, va){
       var tr = document.getElementById('sv_' + orden);
       if(tr) tr.style.display = 'none';
       SERVICIOS_CONF.filas = SERVICIOS_CONF.filas.filter(function(x){ return x.orden !== orden; });
-      recargarPrograma();
+      refrescarTodo();
       if(!SERVICIOS_CONF.filas.length){
         cerrarFicha();
         document.getElementById('barraServicio').innerHTML = '';
@@ -3580,37 +4643,64 @@ function confirmarSrv(btn, orden, va){
     .confirmarServicio(p);
 }
 
+/* Un solo aviso para Desarrollo (pedido de José, 19/10): "sin fecha para Comercial". Junta
+   - los nuevos sin fecha del WIP confirmada (se confirma la fecha y, si es de Comercial, se da la suya), y
+   - los que ya tienen fecha del WIP pero todavia no la de Comercial.
+   En los dos se pone el minutaje con el engranaje. */
 function cargarNuevos(){
   google.script.run
     .withSuccessHandler(function(r){
       if(!r || !r.ok) return;
       NUEVOS = r;
-      var n = r.filas.length;
-      var b = document.getElementById('barraNuevos');
-      if(!n){ b.innerHTML = ''; return; }
-      b.innerHTML = '<button class="nuevos" onclick="verNuevos()">'
-        + '<div>&#9679; <b>' + n + ' estilo(s) sin fecha confirmada</b>'
-        + '<br><span style="font-size:13px;color:#5f6368">'
-        + 'Entraron con fecha automatica. Revisalas y confirmalas.</span></div>'
-        + '<div class="ir">VER</div></button>';
+      pintarBarraPend();
     })
     .withFailureHandler(function(){})
     .getNuevos();
 }
+function pendDes(){ return ((NUEVOS && NUEVOS.filas) || []).filter(function(x){ return x.origen !== 'COMERCIAL'; }); }
+function pendComN(){ return ((NUEVOS && NUEVOS.filas) || []).filter(function(x){ return x.origen === 'COMERCIAL'; }); }
+function pendSfc(){ return (SFC && SFC.ok && SFC.filas) || []; }
+var VN_TIPO = 'com';
+function nPend(t){ return t === 'des' ? pendDes().length : pendComN().length + pendSfc().length; }
+function barraPend(tipo, n, titulo, sub){
+  return n ? '<button class="nuevos" onclick="verNuevos(\'' + tipo + '\')">'
+    + '<div>&#9679; <b>' + n + ' ' + titulo + '</b>'
+    + '<br><span style="font-size:13px;color:#5f6368">' + sub + '</span></div>'
+    + '<div class="ir">VER</div></button>' : '';
+}
+/* Dos avisos (José, 19/10): uno para lo de Desarrollo e Ingenieria (se confirma la fecha del WIP) y
+   otro solo para lo de Comercial (fecha del WIP + fecha para Comercial). En los dos va el engranaje. */
+function pintarBarraPend(){
+  var bn = document.getElementById('barraNuevos'), b = document.getElementById('barraComercial');
+  if(bn) bn.innerHTML = barraPend('des', nPend('des'), 'estilo(s) de Desarrollo e Ingenieria sin fecha confirmada',
+                                  'Entraron con fecha automatica. Revisalas y confirmalas.');
+  if(b) b.innerHTML = barraPend('com', nPend('com'), 'estilo(s) sin fecha para Comercial',
+                                'Comercial los ve como "fecha por confirmar" hasta que les des la suya.');
+}
+function contarPend(){
+  var c = document.getElementById('pendN');
+  if(c) c.textContent = nPend(VN_TIPO) + (VN_TIPO === 'des' ? ' por confirmar' : ' por asignar');
+  pintarBarraPend();
+  if(!nPend(VN_TIPO)) cerrarFicha();
+}
 
-function verNuevos(){
-  if(!NUEVOS || !NUEVOS.filas.length) return;
-  var f = NUEVOS.filas;
+function verNuevos(tipo){
+  tipo = (tipo === 'des') ? 'des' : 'com';
+  VN_TIPO = tipo;
+  if(!nPend(tipo)) return;
+  var esCom = (tipo === 'com');
+  var f = esCom ? pendComN() : pendDes();
+  var g = esCom ? pendSfc() : [];
 
   var h = '<div class="fondo"><div class="ficha" style="max-width:1250px">'
     + '<div class="fcab"><div>'
-    +   '<div class="fl">Ultimos estilos agregados</div>'
-    +   '<div class="fd">' + f.length + ' sin fecha de despacho confirmada'
-    +     ' &middot; desde la orden ' + NUEVOS.desde + '</div>'
+    +   '<div class="fl">' + (esCom ? 'Estilos sin fecha para Comercial' : 'Estilos de Desarrollo e Ingenieria sin fecha confirmada') + '</div>'
+    +   '<div class="fd" id="pendN">' + nPend(tipo) + (esCom ? ' por asignar' : ' por confirmar') + '</div>'
     + '</div><button class="cerrar" onclick="cerrarFicha()">&#10005;</button></div>'
     + '<div class="fcuerpo"><div class="scroll"><table class="fnew"><tr>'
     + '<th>ORDEN</th><th>ESTILO</th><th>CLIENTE</th><th>FASE</th>'
-    + '<th>CANT</th><th>REQUERIDA</th><th>MINUTAJE</th><th>DESPACHO</th>'
+    + '<th>CANT</th><th>REQUERIDA</th><th>MINUTAJE</th><th>DESPACHO WIP</th>'
+    + (esCom ? '<th>PARA COMERCIAL</th>' : '')
     + '<th></th></tr>';
 
   for(var i=0;i<f.length;i++){
@@ -3621,7 +4711,7 @@ function verNuevos(){
                     x.minutos !== undefined && !isNaN(Number(x.minutos)));
     h += '<tr id="n_' + x.orden + '">'
       + '<td><b>' + esc(x.orden) + '</b><br>'
-      +   '<span class="org' + (x.origen==='DESARROLLO'?' des':'') + '">'
+      +   '<span class="org' + (x.origen!=='COMERCIAL'?' des':'') + '">'
       +   esc(x.origen) + '</span></td>'
       + '<td><b>' + esc(x.lives) + '</b><br>'
       +   '<span style="font-size:11px;color:#5f6368">' + esc(x.combo) + '</span></td>'
@@ -3631,23 +4721,48 @@ function verNuevos(){
       + '<td>' + esc(x.cant) + '<br>'
       +   '<span style="font-size:11px;color:#5f6368">T ' + esc(x.talla) + '</span></td>'
       + '<td>' + esc(x.freq) + '</td>'
-      + '<td>' + (tieneMin
-            ? '<b>' + esc(x.minutos) + '</b>'
-            : '<span style="color:var(--alerta)">falta</span>') + '</td>'
+      + '<td class="minCel" id="mnN_' + x.orden + '">' + minCelda('mnN_', x.orden, x.minutos) + '</td>'
       + '<td><input type="date" id="fx_' + x.orden + '" value="' + esc(x.iso) + '"></td>'
+      /* la fecha que se le da a Comercial: igual o despues que la del WIP.
+         Si ya tenia una, aca solo se muestra: se cambia desde EDITAR, con motivo. */
+      + (esCom ? '<td>' + (x.fechaCom
+                  ? '<b>' + esc(x.fechaCom) + '</b><br><span style="font-size:11px;color:#5f6368">ya dada</span>'
+                  : '<input type="date" class="fcom" id="fc_' + x.orden + '" value="' + esc(x.iso) + '">') + '</td>' : '')
       + '<td>' + (tieneMin
-            ? '<button onclick="confirmar(this,\'' + x.orden + '\')">CONFIRMAR</button>'
-            : '<button disabled title="Ponle el minutaje desde EDITAR">SIN MINUTAJE</button>')
+            ? '<button id="cf_' + x.orden + '" onclick="confirmar(this,\'' + x.orden + '\')">CONFIRMAR</button>'
+            : '<button id="cf_' + x.orden + '" disabled title="Ponle el minutaje con el engranaje">SIN MINUTAJE</button>')
       + '</td>'
+      + '</tr>';
+  }
+  // los que ya tienen fecha del WIP: solo falta la de Comercial
+  for(var k=0;k<g.length;k++){
+    var y = g[k];
+    h += '<tr id="sfc_' + y.orden + '">'
+      + '<td><b>' + esc(y.orden) + '</b><br><span class="org">COMERCIAL</span></td>'
+      + '<td><b>' + esc(y.lives) + '</b><br>'
+      +   '<span style="font-size:11px;color:#5f6368">' + esc(y.combo) + '</span></td>'
+      + '<td>' + esc(y.cliente) + '<br>'
+      +   '<span style="font-size:11px;color:#5f6368">' + esc(y.grupo) + '</span></td>'
+      + '<td>' + esc(y.fase) + '</td>'
+      + '<td>' + esc(y.cant) + '<br>'
+      +   '<span style="font-size:11px;color:#5f6368">T ' + esc(y.talla) + '</span></td>'
+      + '<td>' + esc(y.freq) + '</td>'
+      + '<td class="minCel" id="mnN_' + y.orden + '">' + minCelda('mnN_', y.orden, y.minutos) + '</td>'
+      + '<td><b>' + esc(y.xf || 'sin fecha') + '</b><br><span style="font-size:11px;color:#5f6368">ya confirmada</span></td>'
+      + '<td><input type="date" class="fcom" id="sfx_' + y.orden + '" value="' + esc(y.iso) + '"></td>'
+      + '<td><button onclick="asignarFechaCom(this,\'' + y.orden + '\',\'' + esc(y.iso) + '\')">ASIGNAR</button></td>'
       + '</tr>';
   }
   h += '</table></div>'
     + '<div class="hint">Sin <b>minutaje</b> no se puede confirmar: es lo que dice cuanto '
     + 'demora la prenda, y con eso se evalua si la fecha de despacho alcanza. '
-    + 'Se pone abriendo el estilo &rarr; <b>EDITAR</b> &rarr; Minutaje de maquina. '
+    + 'Se pone aqui mismo con el engranaje &#9881; de la columna minutaje, '
+    + 'o abriendo el estilo &rarr; <b>EDITAR</b>. '
     + 'Si todavia no se sabe cuanto demora, pon <b>0</b>.<br>'
-    + 'La fecha viene calculada; si esta bien, solo confirma. '
-    + 'Al confirmar sale de esta lista.</div>'
+    + 'La fecha viene calculada; si esta bien, solo confirma.'
+    + (esCom ? '<br>La fecha <b>para Comercial</b> viene propuesta igual a la del WIP: puede ser igual o despues, nunca antes. '
+             + 'Al confirmar o asignar, el estilo sale de esta lista y Comercial ve su fecha en Seguimiento de protos.'
+             : ' Al confirmar sale de esta lista.') + '</div>'
     + '</div></div></div>';
 
   abrirModal(h);
@@ -3658,23 +4773,30 @@ function confirmar(btn, orden){
   var inp = document.getElementById('fx_' + orden);
   if(!inp || !inp.value){ alert('Pon una fecha antes de confirmar.'); return; }
 
-  var p = { orden:orden, fecha:inp.value, usuario:usuario };
+  // la fecha para Comercial va con la confirmacion (si todavia no la tiene)
+  var fcIn = document.getElementById('fc_' + orden), fechaCom = '';
+  if(fcIn){
+    fechaCom = fcIn.value;
+    if(!fechaCom){ alert('Pon la fecha para Comercial.'); fcIn.focus(); return; }
+    if(fechaCom < inp.value){
+      alert('La fecha para Comercial no puede ser antes que la fecha del WIP.\n\nTiene que ser igual o despues.');
+      fcIn.focus(); return;
+    }
+  }
+
+  var p = { orden:orden, fecha:inp.value, fechaCom:fechaCom, usuario:usuario };
   p.token = tokenPara(btn, p);
 
   btn.disabled = true; btn.textContent = '...';
   var w = conEspera(btn, 'REINTENTAR',
     function(r){
       if(!r || !r.ok){ btn.disabled=false; btn.textContent='REINTENTAR'; alert(r && r.msg); return; }
+      if(r.avisoComercial) alert(r.avisoComercial);
       var tr = document.getElementById('n_' + orden);
       if(tr) tr.style.display = 'none';
       NUEVOS.filas = NUEVOS.filas.filter(function(x){ return x.orden !== orden; });
-      recargarPrograma();
-      if(!NUEVOS.filas.length){ cerrarFicha(); document.getElementById('barraNuevos').innerHTML=''; }
-      else {
-        var c = document.querySelector('.ficha .fd');
-        if(c) c.innerHTML = NUEVOS.filas.length + ' sin fecha de despacho confirmada'
-          + ' &middot; desde la orden ' + NUEVOS.desde;
-      }
+      contarPend();
+      refrescarTodo();
     },
     function(e){
       btn.disabled=false; btn.textContent='REINTENTAR';
@@ -3684,6 +4806,60 @@ function confirmar(btn, orden){
     .withSuccessHandler(w.ok)
     .withFailureHandler(w.mal)
     .confirmarFecha(p);
+}
+
+/* ================== LISTAS DE TELAS Y PARTIDAS ==================
+   El codigo de tela se elige de los que ya estan en el WIP; la partida, del inventario de
+   telas y del seguimiento de partidas. Si no aparece, se puede
+   escribir igual: hay telas de desarrollo que todavia no estan en ninguna base. */
+var CATT = null, CATT_PEND = null;
+function catalogoTelas(){
+  if(CATT) return Promise.resolve(CATT);
+  if(CATT_PEND) return CATT_PEND;
+  var vacio = { telas:[], partidas:[] };
+  if(!window.WM_RPC) return Promise.resolve(vacio);
+  CATT_PEND = WM_RPC('wm_catalogo_telas', {}, 30000).then(function(r){
+    CATT_PEND = null; CATT = (r && r.ok) ? r : vacio; return CATT;
+  }, function(){ CATT_PEND = null; return vacio; });
+  return CATT_PEND;
+}
+function listaDe(id, opciones){
+  var dl = document.getElementById(id);
+  if(!dl){ dl = document.createElement('datalist'); dl.id = id; document.body.appendChild(dl); }
+  if(!dl.childNodes.length) dl.innerHTML = opciones;
+}
+/* codigo de tela: al elegirlo se llena la tela / articulo (si estaba vacia o la habia puesto la lista) */
+function listaCodigos(inputId, telaId){
+  var inp = document.getElementById(inputId); if(!inp) return;
+  catalogoTelas().then(function(c){
+    if(!c.telas || !c.telas.length) return;
+    listaDe('lCodTela', c.telas.map(function(t){ return '<option value="' + esc(t[0]) + '">' + esc(t[1] || '') + '</option>'; }).join(''));
+    inp.setAttribute('list', 'lCodTela');
+    if(!telaId) return;
+    var poner = function(){
+      var k = norm(inp.value), t = document.getElementById(telaId);
+      if(!t) return;
+      for(var i=0;i<c.telas.length;i++) if(norm(c.telas[i][0]) === k){
+        if(!t.value || t.getAttribute('data-auto') === '1'){ t.value = c.telas[i][1] || ''; t.setAttribute('data-auto', '1'); }
+        return;
+      }
+    };
+    inp.addEventListener('change', poner); inp.addEventListener('input', poner);
+    var t0 = document.getElementById(telaId);
+    if(t0) t0.addEventListener('input', function(){ t0.setAttribute('data-auto', '0'); });
+  });
+}
+/* partida: se elige del inventario de telas y del seguimiento de partidas */
+function listaPartidas(inputId){
+  var inp = document.getElementById(inputId); if(!inp) return;
+  catalogoTelas().then(function(c){
+    if(!c.partidas || !c.partidas.length) return;
+    listaDe('lPartidas', c.partidas.map(function(x){
+      var et = [x[1], x[2], x[3]].filter(function(v){ return v; }).join(' \u00b7 ');
+      return '<option value="' + esc(x[0]) + '">' + esc(et) + '</option>';
+    }).join(''));
+    inp.setAttribute('list', 'lPartidas');
+  });
 }
 
 /* ================== FICHA DEL ESTILO ================== */
@@ -3724,7 +4900,8 @@ function pintarFicha(d){
     + '<div class="fcab">'
     +   '<div class="fci">'
     +     '<div class="fl">' + esc(d.lives) + '</div>'
-    +     '<div class="fd">' + esc(d.cliente) + ' &middot; ' + esc(d.grupo) + '<br>'
+    +     '<div class="fd">' + esc(d.cliente) + ' &middot; ' + esc(d.grupo)
+    +       (d.freq ? ' &middot; Req: <b>' + esc(d.freq) + '</b>' : '') + '<br>'
     +       esc(d.fase) + ' &middot; ' + esc(d.combo) + ' &middot; ' + esc(d.cant)
     +       ' prendas &middot; Talla ' + esc(d.talla)
     +       ((d.partida || d.rutaPrenda || d.minutos)
@@ -3738,18 +4915,26 @@ function pintarFicha(d){
     +     '</div>'
     +   '</div>'
     +   '<div class="fdest">'
-    +     '<div class="fdi"><div class="fdl">Status</div>'
-    +       '<div class="fdv">' + esc(d.status) + '</div></div>'
-    +     (d.telaProy && !d.telaReal
+    +     '<div class="fdfila">'            // arriba: las fechas
+    +       (d.telaProy && !d.telaReal
               ? '<div class="fdi"><div class="fdl">Tela llega</div>'
                 + '<div class="fdv">' + esc(d.telaProy) + '</div></div>'
               : '')
-    +     (d.aviosProy && !d.aviosReal
+    +       (d.aviosProy && !d.aviosReal
               ? '<div class="fdi"><div class="fdl">Avios llegan</div>'
                 + '<div class="fdv">' + esc(d.aviosProy) + '</div></div>'
               : '')
-    +     '<div class="fdi' + (d.xf ? '' : ' mal') + '"><div class="fdl">Despacho</div>'
-    +       '<div class="fdv">' + (d.xf ? esc(d.xf) : 'SIN FECHA') + '</div></div>'
+    +       '<div class="fdi' + (d.xf ? '' : ' mal') + '"><div class="fdl">Despacho</div>'
+    +         '<div class="fdv">' + (d.xf ? esc(d.xf) : 'SIN FECHA') + '</div></div>'
+    +       (!d.faltaCom && !AREA && !d.analista
+              ? '<div class="fdi' + (d.fechaCom ? '' : ' mal') + '"><div class="fdl">Comercial</div>'
+                + '<div class="fdv">' + (d.fechaCom ? esc(d.fechaCom) : 'SIN FECHA') + '</div></div>'
+              : '')
+    +     '</div>'
+    +     '<div class="fdfila">'            // abajo: el status
+    +       '<div class="fdi"><div class="fdl">Status</div>'
+    +         '<div class="fdv">' + esc(d.status) + '</div></div>'
+    +     '</div>'
     +   '</div>'
     +   '<button class="cerrar" onclick="cerrarFicha()">&#10005;</button>'
     + '</div><div class="fcuerpo" id="fcuerpo">';
@@ -3767,13 +4952,19 @@ function cuerpoFicha(d){
 
   var r = d.ruta || [];
   // costura e inspeccion ven desde corte; servicio necesita ver todo
-  if(AREA && !AREAS[AREA].soloServicio) r = rutaParaArea(r);
+  if(AREA && !AREAS[AREA].soloServicio && !AREAS[AREA].rutaCompleta) r = rutaParaArea(r);
   if(d.sinRegistros){
     h += '<div class="vacio">Todavia no hay registros. Lo unico que se sabe es donde esta hoy.</div>';
   }
   h += htmlRuta(r);
 
-  if(SOLO_VER){
+  if(AREA && AREAS[AREA] && AREAS[AREA].moldes){
+    // moldes: comenta los pendientes; los entregados son solo para consultar
+    h += (moldePendiente(d) && (WM.des || (WM.areas && WM.areas.moldes)))
+      ? '<div class="fbtns"><button class="bReg" style="flex:1" onclick="comentarioMolde()">A&Ntilde;ADIR COMENTARIO DE MOLDE</button></div>'
+      : (moldePendiente(d) ? '<div class="hint">Solo para quien registra en moldes.</div>'
+                           : '<div class="hint">El molde de este estilo ya se entrego: solo para consultar.</div>');
+  } else if(SOLO_VER){
     // el programa completo se abre solo para mirar
   } else if(AREA){
     // las areas registran lo suyo y nada mas: no editan
@@ -4051,7 +5242,7 @@ function elegir(cod){
 
     h += '<div class="campo"><label>Partida (obligatoria)</label>'
        +   '<input id="fPartida" value="' + esc(FICHA.partida || '') + '"'
-       +   ' placeholder="numero de partida de la tela" autocomplete="off"'
+       +   ' placeholder="elige la partida o escribela" autocomplete="off"'
        +   ' oninput="limpiarMarca(\'fPartida\')">'
        +   '<div class="malmsg" id="m_fPartida"></div>'
        +   '<div class="hint">Es lo que amarra la prenda con la tela que se uso. '
@@ -4070,8 +5261,8 @@ function elegir(cod){
        +   '<input id="fCant" list="lCantF" value="' + esc(FICHA.cant) + '" autocomplete="off">'
        +   '<datalist id="lCantF">' + cn + '</datalist>'
        +   '<div class="hint">El requerimiento pide <b>' + esc(FICHA.cant) + '</b>. '
-       +     'Si la ficha tecnica decia otra cantidad, pon la que cortaste: el '
-       +     'requerimiento no cambia, pero la diferencia queda en la ruta.</div></div>'
+       +     'Si cortaste otra cantidad (por falta o falla de tela, o porque la ficha tecnica decia otra), '
+       +     'pon la que cortaste: el requerimiento pasa a esa cantidad y el cambio queda en la ruta.</div></div>'
        + '<div class="campo"><label>'
        +   (AREA === 'corte' ? 'Tu codigo de cortador (obligatorio)' : 'Cortador (opcional)')
        +   '</label><input id="fQuien" placeholder="codigo del cortador" autocomplete="off"'
@@ -4113,11 +5304,13 @@ function elegir(cod){
       + '<br><b>Revisa que sea el estilo correcto antes de guardar.</b></div>' + h;
   }
 
+
   h += '<div class="fbtns"><button class="bReg" onclick="guardarReg(this)">'
      + esc(AREA && cod === AREAS[AREA].hito ? AREAS[AREA].boton : 'GUARDAR')
      + '</button></div>';
   document.getElementById('detReg').innerHTML = h;
   persPintarTodos();
+  listaPartidas('fPartida');
 }
 
 /* Las areas eligen de la lista cerrada; Desarrollo puede agregar a alguien. */
@@ -4171,7 +5364,7 @@ function guardarComent(btn){
   var fe = leerFecha('cFecha');
   if(!fe) return;                        // la fecha esta mal escrita
   var orden = FICHA.orden;
-  var p = { orden:orden, fecha:fe, etapa:et, texto:t, usuario:usuario };
+  var p = { orden:orden, fecha:fe, etapa:et, texto:t, usuario:usuario, area:AREA };
   p.token = tokenPara(btn, p);
 
   btn.disabled = true; btn.textContent = 'Guardando...';
@@ -4180,6 +5373,7 @@ function guardarComent(btn){
       if(!r || !r.ok){ btn.disabled=false; btn.textContent='REINTENTAR'; alert(r && r.msg); return; }
       // el comentario va intercalado en la ruta, y esa la arma el servidor
       verFicha(orden);
+      if(AREA === 'moldes') cargarMoldes();       // para que la tarjeta cuente el comentario
     },
     function(e){
       btn.disabled=false; btn.textContent='REINTENTAR';
@@ -4248,7 +5442,7 @@ function guardarReg(btn){
     var wa = conEspera(btn, 'REINTENTAR',
       function(r){
         if(!r || !r.ok){ btn.disabled=false; btn.textContent='REINTENTAR'; alert(r && r.msg); return; }
-        recargarPrograma();
+        refrescarTodo();
         verFicha(orden);
       },
       function(e){
@@ -4269,7 +5463,7 @@ function guardarReg(btn){
       cargarArea();
       return;
     }
-    refrescarLista(orden, r.status);
+    refrescarTodo();               // antes solo cambiaba el status en la lista
     verFicha(orden);
   };
   var mal = function(e){
@@ -4300,6 +5494,20 @@ function guardarReg(btn){
         faltan.push(['fPartida', 'Falta la partida de la tela. Sin eso no se registra el corte.']);
       if(AREA === 'corte' && !quienCorte)
         faltan.push(['fQuien', 'Falta tu codigo de cortador.']);
+      /* el codigo tiene que estar en la base de datos de cortadores (tabla de
+         personas de ERORRES, AREA = CORTE). Pueden ser varios: 9714/A330.
+         Mientras la lista este vacia, se acepta cualquiera, como antes. */
+      if(AREA === 'corte' && quienCorte){
+        var lc = ((FICHA && FICHA.personas) || {}).CORTE || [];
+        if(lc.length){
+          var malos = partirPersonas(quienCorte).filter(function(x){ return persIndice(lc, x) < 0; });
+          if(malos.length){
+            faltan.push(['fQuien', (malos.length > 1 ? 'Los codigos ' : 'El codigo ') + malos.join(', ')
+              + (malos.length > 1 ? ' no se encuentran' : ' no se encuentra')
+              + ' en la base de datos de cortadores. Revisalo.']);
+          }
+        }
+      }
       if(faltan.length){
         // al reves, para que el foco quede en el primero que falta
         for(var q=faltan.length-1; q>=0; q--) marcarCampo(faltan[q][0], faltan[q][1]);
@@ -4340,13 +5548,13 @@ function panelEditar(){
   for(var i=0;i<d.editables.length;i++){
     var e = d.editables[i];
     var v = e.valor;
-    if(e.tipo==='fecha' || e.tipo==='tela' || e.tipo==='avios') v = aISO(v);
+    if(e.tipo==='fecha' || e.tipo==='tela' || e.tipo==='avios' || e.tipo==='fechacom') v = aISO(v);
 
     h += '<div class="campo"><label>' + esc(e.etiqueta) + '</label>';
 
     if(e.tipo==='codigo'){
-      h += '<input id="e_' + i + '" value="' + esc(v) + '" placeholder="JE002145"'
-         + ' style="text-transform:uppercase">'
+      h += '<input id="e_' + i + '" data-lcod="1" value="' + esc(v) + '" placeholder="JE002145 · elige de la lista"'
+         + ' autocomplete="off" style="text-transform:uppercase">'
          + '<div class="hint">Se guarda en mayusculas, para poder cruzarlo con las '
          + 'otras areas. Solo cambia el WIP: en <b>BASE</b> queda el que puso comercial.</div>';
     } else if(e.campo === 'ESTILO LIVES'){
@@ -4360,12 +5568,12 @@ function panelEditar(){
       var cl = d.clientes || [];
       for(var q=0;q<cl.length;q++) h += '<option value="' + esc(cl[q]) + '">';
       h += '</datalist>'
-         + '<div class="hint">Se guarda escrito igual que en la tabla de siglas de '
-         + '<b>ERORRES</b> (THEORY, Straight Down...); si no esta ahi, en mayusculas.<br>'
+         + '<div class="hint">Se guarda escrito igual que en la tabla de clientes '
+         + '(THEORY, Straight Down...); si no esta ahi, en mayusculas.<br>'
          + 'Cambiarlo aqui solo afecta al WIP: en <b>BASE</b> '
          + 'ese estilo va a seguir con el cliente anterior.<br>'
-         + 'Si es un cliente nuevo, agregalo tambien a la tabla de siglas de '
-         + '<b>ERORRES</b>, o los proximos ingresos van a volver a salir con grupo VARIOS.</div>';
+         + 'Si es un cliente nuevo, pide que lo agreguen a la tabla de clientes, '
+         + 'o los proximos ingresos van a volver a salir con grupo VARIOS.</div>';
     } else if(e.tipo==='fase'){
       /* Lista de las fases que ya existen, las mas usadas arriba. Si la fase
          de hoy esta escrita distinto a la de la lista, se muestra tal cual y
@@ -4394,6 +5602,15 @@ function panelEditar(){
            + (op[y]===e.valor ? ' selected' : '') + '>' + esc(op[y]) + '</option>';
       }
       h += '</select>';
+    } else if(e.tipo==='fechacom'){
+      h += '<input id="e_' + i + '" type="date" value="' + esc(aISO(e.valor)) + '">'
+         + '<div class="hint">Es la fecha que ve Comercial en Seguimiento de protos. '
+         + 'No puede ser antes que la fecha de despacho del WIP. '
+         + (e.valor
+             ? 'Ya se la dieron (<b>' + esc(e.valor) + '</b>): si la cambias, el <b>motivo es obligatorio</b> '
+               + 'y Comercial lo va a ver.'
+             : 'Todavia no tiene: al ponerla, Comercial la ve.')
+         + '</div>';
     } else if(e.tipo==='avios'){
       h += '<input id="e_' + i + '" type="date" value="' + esc(aISO(e.valor)) + '">'
          + '<div class="hint">'
@@ -4430,6 +5647,10 @@ function panelEditar(){
      + '<button class="bReg" onclick="guardarEdi(this)">GUARDAR CAMBIOS</button>'
      + '<button class="bEdi" onclick="volverFicha()">Cancelar</button></div>';
   document.getElementById('fcuerpo').innerHTML = h;
+  var ec = document.querySelector('#fcuerpo [data-lcod]'); if(ec) listaCodigos(ec.id);
+  var ep = null;
+  for(var j=0;j<d.editables.length;j++) if(d.editables[j].campo === 'PARTIDA') ep = 'e_' + j;
+  if(ep) listaPartidas(ep);
 }
 
 function guardarEdi(btn){
@@ -4440,13 +5661,35 @@ function guardarEdi(btn){
     var el = document.getElementById('e_'+i);
     if(!el) continue;
     var v = el.value;
-    var antes = (e.tipo==='fecha' || e.tipo==='tela' || e.tipo==='avios') ? aISO(e.valor) : e.valor;
+    var antes = (e.tipo==='fecha' || e.tipo==='tela' || e.tipo==='avios' || e.tipo==='fechacom') ? aISO(e.valor) : e.valor;
     if(String(v) === String(antes)) continue;
     cambios.push({ campo:e.campo, valor:v });
   }
   if(!cambios.length){ alert('No cambiaste nada.'); return; }
 
   var mo = document.getElementById('mEdi');
+  /* Fecha para Comercial: igual o despues que la del WIP, y si ya tenia una
+     y se cambia, con motivo (Comercial lo ve). El servidor lo vuelve a revisar. */
+  var eCom = null, eXf = null, iCom = -1, iXf = -1;
+  for(var q=0;q<FICHA.editables.length;q++){
+    if(FICHA.editables[q].campo === 'FECHA_COM'){ eCom = FICHA.editables[q]; iCom = q; }
+    if(FICHA.editables[q].campo === 'XF REAL'){   eXf  = FICHA.editables[q]; iXf  = q; }
+  }
+  var cambiaCom = cambios.some(function(x){ return x.campo === 'FECHA_COM'; });
+  if(cambiaCom){
+    var vCom = document.getElementById('e_' + iCom).value;
+    var vXf  = iXf >= 0 ? document.getElementById('e_' + iXf).value : '';
+    if(eCom.valor && !vCom){ alert('La fecha para Comercial no se puede dejar vacia: ya se la dieron.'); return; }
+    if(vCom && vXf && vCom < vXf){
+      alert('La fecha para Comercial no puede ser antes que la fecha de despacho del WIP.\n\nTiene que ser igual o despues.');
+      return;
+    }
+    if(eCom.valor && !(mo && mo.value.trim())){
+      alert('Esta fecha ya se la dieron a Comercial. Para cambiarla escribe el motivo: Comercial lo va a ver.');
+      if(mo) mo.focus();
+      return;
+    }
+  }
   var orden = FICHA.orden;
   var p = { orden:orden, cambios:cambios, motivo:mo?mo.value:'', usuario:usuario };
   p.token = tokenPara(btn, p);
@@ -4456,7 +5699,8 @@ function guardarEdi(btn){
     function(r){
       if(!r || !r.ok){ btn.disabled=false; btn.textContent='REINTENTAR';
         alert(r && r.msg); return; }
-      recargarPrograma();
+      if(r.avisoComercial) alert(r.avisoComercial);     // cambio la fecha del WIP: avisar a Comercial
+      refrescarTodo();
       verFicha(orden);
     },
     function(e){
@@ -4499,7 +5743,8 @@ var PERSONAS = {};
 function campoPersonas(id, etiqueta, lista, valor, libre, ayuda){
   var sinLista = !(lista && lista.length);
   if(sinLista) libre = true;        // sin lista no se puede exigir elegir de la lista
-  PERSONAS[id] = { lista:(lista || []).slice(), sel:partirPersonas(valor),
+  PERSONAS[id] = { etq:String(etiqueta || '').toLowerCase(),
+                   lista:(lista || []).slice(), sel:partirPersonas(valor),
                    libre:!!libre, opc:[], i:0 };
   return '<div class="campo"><label>' + esc(etiqueta) + '</label>'
     + '<div class="pers" id="pb_' + id + '" onclick="persFoco(\'' + id + '\')">'
@@ -4512,8 +5757,8 @@ function campoPersonas(id, etiqueta, lista, valor, libre, ayuda){
     + '<div class="malmsg" id="m_' + id + '"></div>'
     + (sinLista
         ? '<div class="hint" style="color:#8A5A00"><b>No hay lista de personas cargada.</b> '
-          + 'Se puede escribir el nombre igual, pero avisale a Desarrollo: falta la tabla '
-          + 'de personas en ERORRES, o el Codigo.gs no es el del mismo build.</div>'
+          + 'Se puede escribir el nombre igual, pero avisale a Desarrollo: falta cargar '
+          + 'la lista de personas de esta area.</div>'
         : (ayuda ? '<div class="hint">' + ayuda + '</div>' : ''))
     + '</div>';
 }
@@ -4632,7 +5877,8 @@ function persCerrar(id){
 
   var msg = c.length
     ? 'Hay varias que empiezan con "' + t + '". Elige una de la lista.'
-    : '"' + t + '" no esta en la lista. Elige una de la lista.';
+    : '"' + t + '" no se encuentra en la base de datos de ' + (P.etq || 'personal')
+      + '. Revisa el nombre y eligelo de la lista.';
   marcarCampo(id, msg);
   persFoco(id);
   return msg;
@@ -4737,7 +5983,9 @@ function iniciarWip(){
     WM.des = !!r.desarrollo; WM.areas = r.areas || {}; WM.nombre = r.nombre || '';
     if(AREA && !AREAS[AREA]) AREA = '';
     var aviso = '';
-    if(AREA && !WM.des && !WM.areas[AREA]){
+    /* Seguimiento de protos (Comercial) y de moldes se abren para mirar aunque la persona no registre */
+    var paraMirar = { comercial:true, moldes:true };
+    if(AREA && !WM.des && !WM.areas[AREA] && !paraMirar[AREA]){
       aviso = 'Tu usuario no registra en ' + AREA.toUpperCase() + ': se abre solo para consultar.';
       AREA = '';
     }
@@ -4752,7 +6000,10 @@ function iniciarWip(){
       for(var i=0;i<tj.length && i<2;i++) tj[i].style.display = 'none';   // ingresar requerimientos
     }
     cargarNombre();
-    if(AREA && AREAS[AREA]) menuArea(); else irMenu();
+    if(AREA === 'comercial') abrirComercial();
+    else if(AREA === 'moldes') abrirMoldes();
+    else if(AREA === 'ingenieria') abrirIngenieria();
+    else if(AREA && AREAS[AREA]) menuArea(); else irMenu();
     if(aviso) document.querySelector('.wrap').insertAdjacentHTML('afterbegin', '<div class="aviso">' + esc(aviso) + '</div>');
     WM_PRECARGAR();
   }, function(e){
