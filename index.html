@@ -708,6 +708,9 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
   .campo input,.campo select{width:100%;padding:11px;font-size:15px;
         border:1px solid var(--linea);border-radius:8px;outline:none;font-family:inherit;}
   .campo input:focus,.campo select:focus{border-color:var(--azul);}
+  .campo textarea{width:100%;padding:11px;font-size:15px;font-family:inherit;border:1px solid var(--linea);
+                  border-radius:8px;background:#fff;resize:vertical;box-sizing:border-box;}
+  .campo textarea:focus{border-color:var(--azul);outline:none;}
   .opcs{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
   .opc{flex:1;min-width:140px;padding:14px;border:2px solid var(--azul);border-radius:10px;
        background:#fff;color:var(--azul);font-weight:bold;cursor:pointer;
@@ -737,7 +740,7 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
   @media print{
     @page{margin:12mm 10mm;}
     body{background:#fff;}
-    .barra,.impr,#modal,#barraNuevos,#barraTela,#barraAvios,#barraServicio,#barraComercial,
+    .barra,.impr,#modal,#barraNuevos,#barraEsperas,#barraTela,#barraAvios,#barraServicio,#barraComercial,
     #pMenu,#pIngreso,#pDesarrollo,#pBuscar,#pArea,#pMenuArea,
     .filtros,.plano,.hint{display:none!important;}
     .wrap{max-width:none;padding:0;}
@@ -877,6 +880,15 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
   .chip.fcp{background:#EEF1F0;color:var(--gris);font-weight:bold;}
   .chip.fcc{background:#FEF3E2;color:#B45309;font-weight:bold;}
   .fnew input.fcom{border-color:#A9D6C5;}
+
+  /* seccion Comercial de la ficha y la espera del cliente */
+  .comBox{border:1px solid var(--linea);border-radius:12px;padding:14px 16px;background:#F6FAF8;margin-bottom:14px;}
+  .comBox .comEstado{font-size:15px;margin-bottom:8px;}
+  .comBox .comEspera{background:#FEF3E2;border:1px solid #F5C77E;border-radius:9px;padding:8px 12px;
+                     color:#7A4405;font-size:14px;margin-bottom:10px;}
+  .comBox .comEspera span{color:#5f6368;font-size:13px;}
+  .banda.espera{background:#B45309;}
+  .est .esperaLinea{font-size:12.5px;color:#7A4405;margin-top:4px;}
 
   /* minutaje en la misma fila: engranaje para abrir, check para guardar */
   button.engr,.fnew button.engr{border:1px solid var(--linea);background:#fff;color:var(--gris);
@@ -1140,6 +1152,7 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
     <div id="barraServicio"></div>
     <div id="barraComercial"></div>
     <div id="barraNuevos"></div>
+    <div id="barraEsperas"></div>
     <div class="filtros">
       <div class="fila1">
         <div class="cel">
@@ -1494,7 +1507,21 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
     var t = _norm(tipo);
     return t.indexOf('CAMBIO') === 0 || t.indexOf('REPROG') !== -1 || t.indexOf('REPROCESO') === 0 || t === 'ANULADO'
         || t === 'SERVICIO' || t === 'RETORNO' || t === 'STAND BY' || t === 'CANCELADO' || t === 'CANTIDAD CORTADA'
-        || t === 'FECHA COMERCIAL' || t === 'CAMBIO FECHA COMERCIAL';
+        || t === 'FECHA COMERCIAL' || t === 'CAMBIO FECHA COMERCIAL'
+        || t === 'EN ESPERA' || t === 'CAMBIO ESPERA' || t === 'FIN DE ESPERA';
+  }
+  /* en espera del cliente: AVIOS, TELA o PINNED (José, 20/10) */
+  function _textoEspera(t){ return t === 'PINNED' ? 'pinned' : (t === 'TELA' ? 'tela' : 'avios'); }
+  function _fraseEspera(mv){
+    var t = _norm(mv.tipo), que = _textoEspera(_norm(mv.detalle));
+    if (t === 'EN ESPERA')     return 'EN ESPERA DE ' + que.toUpperCase() + ' DEL CLIENTE  \u2014  llega ' + mv.despues;
+    if (t === 'CAMBIO ESPERA') return 'ESPERA DE ' + que.toUpperCase() + ' REPROGRAMADA  \u2014  de ' + mv.antes + ' a ' + mv.despues;
+    return 'LLEGO ' + que.toUpperCase() + ' DEL CLIENTE  \u2014  sale de espera';
+  }
+  function _espera(f){
+    var fl = _fecha(f.esperaLlega);
+    return { espera:_norm(f.espera), esperaMotivo:_txt(f.esperaMotivo),
+             esperaLlega: fl ? _fechaTexto(fl) : '', esperaIso: fl ? _iso(fl) : '' };
   }
   function _sinX(s){ var t = _txt(s); return (t.toUpperCase().indexOf('X ') === 0) ? t.substring(2).trim() : t; }
   function _mismoDia(a, b){ return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
@@ -1532,7 +1559,9 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
         if (!_txt(f.telaReal)){ var vt = _fecha(_telaProy(f)); if (vt){ tela = _fechaTexto(vt); telaIso = _iso(vt); } }
         var avios = '', aviosIso = '';
         if (_txt(f.aviosProy) && !_txt(f.aviosReal)){ var fav = _fecha(f.aviosProy); if (fav){ avios = _fechaTexto(fav); aviosIso = _iso(fav); } }
+        var es = _espera(f);
         var o = {
+          espera:es.espera, esperaMotivo:es.esperaMotivo, esperaLlega:es.esperaLlega, esperaIso:es.esperaIso,
           orden:orden, avios:avios, aviosIso:aviosIso, comercial: !_txt(f.analista),
           costurera:_txt(f.costurera), auditora:_txt(f.auditora), tela:tela, telaIso:telaIso,
           grupo:_txt(f.grupo) || 'SIN GRUPO', cliente:_txt(f.cliente), lives:_txt(f.lives), estcli:_txt(f.estcli),
@@ -1570,6 +1599,7 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
         if (!st || FUERA_DEL_PROGRAMA.indexOf(st) !== -1) continue;
         if (_txt(f.analista)) continue;
         if (_fecha(f.fechaCom)) continue;
+        if (_txt(f.espera)) continue;                 // en espera del cliente: todavia no se le puede dar fecha
         if (/^#/.test(_txt(f.lives))) continue;
         var fxf = _fecha(f.xf);
         out.push({ orden:orden, lives:_txt(f.lives), cliente:_txt(f.cliente), grupo:_txt(f.grupo), fase:_txt(f.fase),
@@ -1748,6 +1778,8 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
           qq = 'SERVICIO  \u00b7  VUELVE' + (a ? '  \u2014  a ' + a : '');
         } else if (t === 'ANULADO'){
           qq = (de ? de + '  \u00b7  ' : '') + 'REGISTRO ANULADO' + (a ? '  \u2014  vuelve a ' + a : '');
+        } else if (t === 'EN ESPERA' || t === 'CAMBIO ESPERA' || t === 'FIN DE ESPERA'){
+          qq = _fraseEspera(mv);
         } else if (t === 'FECHA COMERCIAL'){
           qq = 'FECHA PARA COMERCIAL  \u2014  ' + mv.despues;
         } else if (t === 'CAMBIO FECHA COMERCIAL'){
@@ -1823,12 +1855,13 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
         partida:_txt(f.partida), costurera:_txt(f.costurera), auditora:_txt(f.auditora), rutaPrenda:_txt(f.rutaPrenda),
         minutos:_txt(f.minutos), freq:_txt(f.freq), xf:_txt(f.xf), telaReal:_txt(f.telaReal),
         aviosProy:_txt(f.aviosProy), aviosReal:_txt(f.aviosReal), faltaAvios:false, molde:_txt(f.molde), editables:[],
-        fechaCom:_txt(f.fechaCom), analista:_txt(f.analista), faltaCom:false
+        fechaCom:_txt(f.fechaCom), analista:_txt(f.analista), faltaCom:false,
+        espera:_norm(f.espera), esperaMotivo:_txt(f.esperaMotivo), esperaLlega:_txt(f.esperaLlega), faltaEspera:false
       };
       d.telaProy = _telaProy(f);
       var fu = DATOS.fasesUso || [];
       EDITABLES.forEach(function(e){
-        if (e.tipo === 'fechacom'){ if (d.analista) return; d.editables.push({ campo:e.campo, etiqueta:e.etiqueta, tipo:e.tipo, valor:d.fechaCom }); return; }
+        if (e.tipo === 'fechacom') return;   // tiene su propia seccion en la ficha: Comercial (José, 20/10)
         if (e.tipo === 'avios'){ if (d.aviosReal) return; d.editables.push({ campo:e.campo, etiqueta:e.etiqueta, tipo:e.tipo, valor:d.aviosProy }); return; }
         if (e.tipo === 'tela'){ if (d.telaReal) return; d.editables.push({ campo:e.campo, etiqueta:e.etiqueta, tipo:e.tipo, valor:d.telaProy }); return; }
         var it = { campo:e.campo, etiqueta:e.etiqueta, tipo:e.tipo, valor:_txt(f[e.dato]) };
@@ -1941,6 +1974,8 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
                   fase:_txt(f.fase), combo:_txt(f.combo), cant:(cant === '' ? '' : cant), talla:_txt(f.talla), status:_txt(f.status),
                   fechaCom: fc ? _fechaTexto(fc) : '', comIso: fc ? _iso(fc) : '', dia: fc ? DIAS_SEMANA[fc.getDay()] : '',
                   cambiada: !!camb[orden], freq: fr ? _fechaTexto(fr) : '' };
+        var es = _espera(f);
+        o.espera = es.espera; o.esperaMotivo = es.esperaMotivo; o.esperaLlega = es.esperaLlega;
         o.busq = _norm([o.orden, o.lives, o.estcli, o.cliente, o.grupo, o.combo, o.fase, o.talla, o.status].join(' '));
         out.push(o);
       });
@@ -1967,6 +2002,11 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
       }
       for (var j = 0; j < d.historial.length; j++){
         var mv = d.historial[j], t = _norm(mv.tipo);
+        if (t === 'EN ESPERA' || t === 'CAMBIO ESPERA' || t === 'FIN DE ESPERA'){
+          ruta.push({ q:_fraseEspera(mv), c:_soloDia(mv.fecha) + (mv.motivo ? '  \u00b7  Motivo: ' + mv.motivo : ''),
+                      cam:true, ts: mv.orden3 || 0 });
+          continue;
+        }
         if (t !== 'FECHA COMERCIAL' && t !== 'CAMBIO FECHA COMERCIAL') continue;
         ruta.push({ q: t === 'FECHA COMERCIAL' ? 'FECHA DE ENTREGA  \u2014  ' + mv.despues
                                                : 'FECHA DE ENTREGA CAMBIADA  \u2014  de ' + mv.antes + ' a ' + mv.despues,
@@ -1975,7 +2015,8 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
       ruta.sort(function(a, b){ return a.ts - b.ts; });
       if (hoy) ruta.push(hoy);
       return { ok:true, orden:d.orden, lives:d.lives, estcli:d.estcli, cliente:d.cliente, grupo:d.grupo, fase:d.fase,
-               combo:d.combo, cant:d.cant, talla:d.talla, status:d.status, fechaCom:d.fechaCom, freq:d.freq, ruta:ruta };
+               combo:d.combo, cant:d.cant, talla:d.talla, status:d.status, fechaCom:d.fechaCom, freq:d.freq, ruta:ruta,
+               espera:d.espera, esperaMotivo:d.esperaMotivo, esperaLlega:d.esperaLlega };
     });
   }
 
@@ -2084,7 +2125,9 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
     guardarComentario: function(p){ return escribir('wm_comentario', p); },
     quitarComentarios: function(p){ return escribir('wm_quitar_comentarios', p); },
     guardarIngreso:    function(p){ return escribir('wm_guardar_ingreso', p); },
-    guardarDesarrollo: function(p){ return escribir('wm_guardar_desarrollo', p); }
+    guardarDesarrollo: function(p){ return escribir('wm_guardar_desarrollo', p); },
+    ponerEnEspera:     function(p){ return escribir('wm_espera', p); },
+    terminarEspera:    function(p){ return escribir('wm_fin_espera', p); }
   };
 
   /* google.script.run de mentira: misma forma de uso, por debajo va a Supabase */
@@ -2119,7 +2162,7 @@ var AREA = (new URLSearchParams(location.search).get('area') || '').toLowerCase(
 /* Marca del archivo, para saber si lo que corre es lo ultimo que se
    entrego. No se muestra en pantalla: se consulta escribiendo VERSION
    en la consola del navegador (F12 -> Consola). */
-var VERSION = 'build 20oct-1 / supabase-4';
+var VERSION = 'build 20oct-2 / supabase-5';
 
 var usuario = '', PREVIEW = null;
 var PE = { filas:[], semana:'TODAS', status:'TODOS', tope:0, hora:'' };
@@ -2825,6 +2868,7 @@ function pintarPE(){
   verMinutaje(lista);
   if(!SOLO_VER) titulo('PROGRAMA WIP', '');
   barraTelaHoy();
+  barraEsperas();
   barraAviosHoy();
 
   var c = document.getElementById('listaPE');
@@ -2924,6 +2968,9 @@ function fila(f){
   // cuando se pidio. Solo en los de comercial: los de desarrollo se
   // ingresan el mismo dia y esa fecha no dice nada.
   if(f.comercial && f.freq) abajo.push({ v:'Req ' + f.freq, cl:'' });
+  // en espera de algo del cliente
+  if(f.espera) abajo.push({ v:'En espera de ' + textoEspera(f.espera) + (f.esperaLlega ? ' \u00b7 llega ' + f.esperaLlega : ''),
+                            cl:(f.esperaIso && PE.hoyIso && f.esperaIso <= PE.hoyIso) ? ' tarde' : ' hoy' });
 
   // quien lo tiene en la mano ahora mismo
   if(f.costurera) abajo.push({ v:'Costurera ' + f.costurera, cl:' quien' });
@@ -4217,8 +4264,14 @@ function pintarComercial(){
   document.getElementById('coV').textContent = lista.length;
   var c = document.getElementById('coLista');
   if(!lista.length){ c.innerHTML = '<div class="aviso">No hay estilos con ese filtro.</div>'; return; }
+  /* primero las secciones de espera (avios, tela, pinned), despues por fecha
+     de entrega, y al final los que todavia no tienen fecha */
+  var grupo = function(f){
+    if(f.espera) return '0' + ({ AVIOS:'1', TELA:'2', PINNED:'3' }[f.espera] || '9');
+    return f.comIso ? '1' + f.comIso : '2';
+  };
   lista.sort(function(a, b){
-    var x = a.comIso || '9999', y = b.comIso || '9999';
+    var x = grupo(a), y = grupo(b);
     if(x !== y) return x < y ? -1 : 1;
     if(a.cliente !== b.cliente) return a.cliente < b.cliente ? -1 : 1;
     return a.lives < b.lives ? -1 : 1;
@@ -4227,13 +4280,15 @@ function pintarComercial(){
   var h = '', clave = null, buffer = '', cab = '', hoyC = hoyISO();
   var cerrar = function(){ if(clave === null) return; h += cab + '<div class="caja">' + buffer + '</div>'; buffer = ''; };
   for(var i=0;i<pinta.length;i++){
-    var f = pinta[i], k = f.comIso || '';
+    var f = pinta[i], k = grupo(f);
     if(k !== clave){
       cerrar(); clave = k;
       var n = 0, pr = 0;
-      for(var z=i; z<lista.length && (lista[z].comIso || '') === k; z++){ n++; if(typeof lista[z].cant === 'number') pr += lista[z].cant; }
-      cab = '<div class="banda' + (!k ? ' nada' : (k < hoyC ? ' vieja' : '')) + '"><div>'
-          + (k ? 'Entrega ' + esc(f.dia) + ' ' + esc(f.fechaCom) : 'FECHA POR CONFIRMAR') + '</div>'
+      for(var z=i; z<lista.length && grupo(lista[z]) === k; z++){ n++; if(typeof lista[z].cant === 'number') pr += lista[z].cant; }
+      var esp = k.charAt(0) === '0', iso = k.charAt(0) === '1' ? k.slice(1) : '';
+      cab = '<div class="banda' + (esp ? ' espera' : (!iso ? ' nada' : (iso < hoyC ? ' vieja' : ''))) + '"><div>'
+          + (esp ? (f.espera === 'PINNED' ? 'EN ESPERA PINNED' : 'EN ESPERA DE ' + textoEspera(f.espera).toUpperCase())
+                 : (iso ? 'Entrega ' + esc(f.dia) + ' ' + esc(f.fechaCom) : 'FECHA POR CONFIRMAR')) + '</div>'
           + '<div class="sub">' + n + ' estilo' + (n === 1 ? '' : 's') + ' &middot; ' + pr + ' prendas</div></div>';
     }
     buffer += filaComercial(f);
@@ -4263,6 +4318,9 @@ function filaComercial(f){
     +     '<div class="fl1"><span class="liv">' + esc(f.lives) + '</span>'
     +       (f.fase ? '<span class="dt1">' + esc(f.fase) + '</span>' : '') + '</div>'
     +     (l2 ? '<div class="fl2">' + l2 + '</div>' : '')
+    +     (f.espera ? '<div class="esperaLinea">&#9203; Llega ' + esc(f.esperaLlega || '-')
+                    + (f.esperaMotivo ? ' &middot; ' + esc(f.esperaMotivo) : '')
+                    + (f.fechaCom ? ' &middot; entrega ' + esc(f.fechaCom) : '') + '</div>' : '')
     +   '</div>'
     +   '<div class="der">'
     /* la fecha de entrega ya esta en la banda de arriba (verde, o roja si ya
@@ -4290,13 +4348,18 @@ function verFichaComercial(orden){
         +     '</div>'
         +   '</div>'
         +   '<div class="fdest">'
-        +     '<div class="fdfila"><div class="fdi' + (d.fechaCom ? '' : ' mal') + '"><div class="fdl">Entrega</div>'
+        +     '<div class="fdfila">'
+        +       (d.espera ? '<div class="fdi mal"><div class="fdl">En espera de ' + esc(textoEspera(d.espera)) + '</div>'
+                          + '<div class="fdv">llega ' + esc(d.esperaLlega || '-') + '</div></div>' : '')
+        +       '<div class="fdi' + (d.fechaCom ? '' : ' mal') + '"><div class="fdl">Entrega</div>'
         +       '<div class="fdv">' + (d.fechaCom ? esc(d.fechaCom) : 'POR CONFIRMAR') + '</div></div></div>'
         +     '<div class="fdfila"><div class="fdi"><div class="fdl">Status</div>'
         +       '<div class="fdv">' + esc(d.status) + '</div></div></div>'
         +   '</div>'
         +   '<button class="cerrar" onclick="cerrarFicha()">&#10005;</button>'
         + '</div><div class="fcuerpo">'
+        +   (d.espera && d.esperaMotivo ? '<div class="aviso">En espera de ' + esc(textoEspera(d.espera)) + ' del cliente: '
+                + esc(d.esperaMotivo) + '</div>' : '')
         +   '<div class="rot">Como va</div>' + htmlRuta(d.ruta || [])
         +   (d.fechaCom ? '' : '<div class="hint">Desarrollo todavia no confirma la fecha de entrega de este estilo.</div>')
         + '</div></div></div>';
@@ -4988,6 +5051,7 @@ function cuerpoFicha(d){
        + '<button class="bReg" style="flex:1" onclick="panelRegistrar()">REGISTRAR</button>'
        + '</div>';
   } else {
+    h += seccionComercial(d);
     h += '<div class="fbtns">'
        + '<button class="bReg" onclick="panelRegistrar()">REGISTRAR</button>'
        + '<button class="bEdi" onclick="panelEditar()">&#9881; EDITAR</button>'
@@ -5726,6 +5790,204 @@ function guardarEdi(btn){
     .withSuccessHandler(w.ok)
     .withFailureHandler(w.mal)
     .editarEstilo(p);
+}
+
+/* ---------- aviso: llego la fecha de lo que se esperaba del cliente ----------
+   Los estilos en espera cuya fecha de llegada es hoy o ya paso. En la lista:
+   LLEGO (sale de espera y vuelve al aviso de fecha para Comercial) o CAMBIAR
+   FECHA si todavia no llega. Tocar el estilo abre su ficha. */
+function esperasParaRevisar(){
+  return PE.filas.filter(function(f){ return f.espera && f.esperaIso && PE.hoyIso && f.esperaIso <= PE.hoyIso; });
+}
+
+function barraEsperas(){
+  var b = document.getElementById('barraEsperas');
+  if(!b) return;
+  if(AREA || SOLO_VER || !(window.WM && WM.des)){ b.innerHTML = ''; return; }
+  var t = esperasParaRevisar();
+  if(!t.length){ b.innerHTML = ''; return; }
+  var cuenta = {};
+  t.forEach(function(f){ cuenta[f.espera] = (cuenta[f.espera] || 0) + 1; });
+  var partes = Object.keys(cuenta).map(function(k){ return 'llego ' + textoEspera(k) + ' (' + cuenta[k] + ')'; });
+  b.innerHTML = '<button class="nuevos tarde" onclick="verEsperas()">'
+    + '<div>&#9679; <b>' + t.length + ' estilo(s) en espera del cliente: llego la fecha, revisar</b>'
+    + '<br><span style="font-size:13px;color:#5f6368">' + esc(partes.join(' \u00b7 '))
+    + '. Si ya llego, marcalo y vuelve al aviso de fecha para Comercial.</span></div>'
+    + '<div class="ir">VER</div></button>';
+}
+
+function verEsperas(){
+  var t = esperasParaRevisar();
+  if(!t.length) return;
+  t.sort(function(a, b){ return a.esperaIso < b.esperaIso ? -1 : 1; });
+  var h = '<div class="fondo"><div class="ficha" style="max-width:1200px">'
+    + '<div class="fcab"><div class="fci"><div class="fl">En espera del cliente: llego la fecha</div>'
+    + '<div class="fd">' + t.length + ' estilo(s) para revisar</div></div>'
+    + '<button class="cerrar" onclick="cerrarFicha()">&#10005;</button></div>'
+    + '<div class="fcuerpo"><div class="scroll"><table class="fnew"><tr><th>ESTILO</th><th>CLIENTE</th>'
+    + '<th>QUE SE ESPERA</th><th>MOTIVO</th><th>DEBIA LLEGAR</th><th>NUEVA FECHA</th><th></th></tr>';
+  for(var i=0;i<t.length;i++){
+    var f = t[i];
+    h += '<tr id="es_' + f.orden + '" class="nfila" title="Toca para abrir la ficha del estilo" '
+       +   'onclick="if(!event.target.closest(\'input,button\')){ cerrarFicha(); verFicha(\'' + f.orden + '\'); }">'
+       + '<td><b>' + esc(f.lives) + '</b><br><span style="font-size:11px;color:#5f6368">' + esc(f.combo) + '</span></td>'
+       + '<td>' + esc(f.cliente) + '</td>'
+       + '<td><b>' + esc(textoEspera(f.espera)) + '</b></td>'
+       + '<td style="max-width:280px;white-space:normal">' + esc(f.esperaMotivo) + '</td>'
+       + '<td>' + esc(f.esperaLlega) + (f.esperaIso === PE.hoyIso ? ' (hoy)' : '') + '</td>'
+       + '<td><input type="date" id="esf_' + f.orden + '"></td>'
+       + '<td style="white-space:nowrap"><button onclick="llegoEspera(this,\'' + f.orden + '\')">LLEGO</button> '
+       +   '<button style="background:#fff;color:#0E3B36;border:1px solid #c9d3cf" '
+       +   'onclick="cambiarFechaEspera(this,\'' + f.orden + '\')">CAMBIAR FECHA</button></td></tr>';
+  }
+  h += '</table></div><div class="hint">Si ya llego, <b>LLEGO</b>: sale de espera y vuelve al aviso de estilos sin fecha '
+     + 'para Comercial. Si todavia no llega, pon la nueva fecha y <b>CAMBIAR FECHA</b>.</div></div></div></div>';
+  abrirModal(h);
+}
+
+function cambiarFechaEspera(btn, orden){
+  if(!usuario){ cambiarNombre(); if(!usuario) return; }
+  var v = document.getElementById('esf_' + orden).value;
+  if(!v){ alert('Pon la nueva fecha en que llega.'); return; }
+  var p = { orden:orden, soloFecha:true, fecha:v, usuario:usuario };
+  p.token = tokenPara(btn, p);
+  btn.disabled = true; btn.textContent = '...';
+  var w = conEspera(btn, 'REINTENTAR',
+    function(r){
+      if(!r || !r.ok){ btn.disabled=false; btn.textContent='REINTENTAR'; alert(r && r.msg); return; }
+      var row = document.getElementById('es_' + orden);
+      if(row) row.innerHTML = '<td colspan="7" class="listo">&#10003; Nueva fecha: ' + esc(aDMA(v)) + '</td>';
+      refrescarTodo();
+    },
+    function(e){ btn.disabled=false; btn.textContent='REINTENTAR'; alert('Se corto la conexion: ' + e.message); });
+  google.script.run.withSuccessHandler(w.ok).withFailureHandler(w.mal).ponerEnEspera(p);
+}
+
+/* ---------- seccion COMERCIAL de la ficha (solo Desarrollo) ----------
+   Solo en requerimientos de Comercial. Dos botones: la fecha para Comercial
+   (ingresarla, o modificarla con motivo) y poner en espera cuando el estilo
+   espera algo del cliente (avios, tela o pinned), con motivo y fecha en que
+   llega. Si ya esta en espera: cambiarla, o marcar que llego. */
+function textoEspera(t){ return t === 'PINNED' ? 'pinned' : (t === 'TELA' ? 'tela' : 'avios'); }
+
+function seccionComercial(d){
+  if(AREA || SOLO_VER || !(window.WM && WM.des) || d.analista || d.faltaCom) return '';
+  var h = '<div class="rot" style="margin-top:18px">Comercial</div><div class="comBox">'
+    + '<div class="comEstado">' + (d.fechaCom
+        ? 'Fecha para Comercial: <b>' + esc(d.fechaCom) + '</b>'
+        : '<b style="color:var(--alerta)">Sin fecha para Comercial</b>') + '</div>';
+  if(d.espera){
+    h += '<div class="comEspera">&#9203; En espera de <b>' + esc(textoEspera(d.espera)) + '</b> del cliente'
+       + ' &middot; llega <b>' + esc(d.esperaLlega || '-') + '</b>'
+       + (d.esperaMotivo ? '<br><span>' + esc(d.esperaMotivo) + '</span>' : '') + '</div>';
+  }
+  h += '<div class="opcs">'
+    + '<button class="opc" onclick="panelFechaCom()">' + (d.fechaCom
+        ? 'Modificar fecha<br><small>pide el motivo del cambio</small>'
+        : 'Ingresar fecha comercial<br><small>Comercial la va a ver</small>') + '</button>'
+    + (d.faltaEspera
+        ? '<button class="opc" disabled>Poner en espera<br><small>falta correr instalarEspera</small></button>'
+        : '<button class="opc" onclick="panelEspera()">' + (d.espera
+            ? 'Cambiar espera<br><small>que se espera, motivo o fecha</small>'
+            : 'Poner en espera<br><small>avios, tela o pinned del cliente</small>') + '</button>')
+    + (d.espera ? '<button class="opc" onclick="llegoEspera(this)">Llego ' + esc(textoEspera(d.espera))
+        + '<br><small>sale de espera</small></button>' : '')
+    + '</div></div>';
+  return h;
+}
+
+function panelFechaCom(){
+  var d = FICHA, mod = !!d.fechaCom;
+  document.getElementById('fcuerpo').innerHTML =
+      '<div class="rot">' + (mod ? 'Modificar la fecha para Comercial' : 'Ingresar la fecha para Comercial') + '</div>'
+    + campo('Fecha para Comercial', '<input type="date" id="cFechaCom" value="' + esc(aISO(d.fechaCom || d.xf)) + '">')
+    + '<div class="hint">Igual o despues que la fecha del WIP (' + esc(d.xf || 'sin fecha') + '). '
+    +   'Comercial la ve en Seguimiento de protos.</div>'
+    + (mod ? campo('Motivo del cambio (obligatorio: Comercial lo ve)', '<textarea id="cFechaComMot" rows="2"></textarea>') : '')
+    + '<div class="fbtns"><button class="bEdi" onclick="volverFicha()">Cancelar</button>'
+    + '<button class="bReg" onclick="guardarFechaCom(this)">' + (mod ? 'GUARDAR CAMBIO' : 'GUARDAR FECHA') + '</button></div>';
+}
+
+function guardarFechaCom(btn){
+  if(!usuario){ cambiarNombre(); if(!usuario) return; }
+  var d = FICHA, v = document.getElementById('cFechaCom').value;
+  var mo = document.getElementById('cFechaComMot'), motivo = mo ? mo.value.trim() : '';
+  if(!v){ alert('Pon la fecha para Comercial.'); return; }
+  var xfIso = aISO(d.xf);
+  if(xfIso && v < xfIso){ alert('La fecha para Comercial no puede ser antes que la fecha del WIP (' + d.xf + ').'); return; }
+  if(d.fechaCom && v === aISO(d.fechaCom)){ alert('Es la misma fecha que ya tiene.'); return; }
+  if(d.fechaCom && !motivo){ alert('Escribe el motivo del cambio: Comercial lo va a ver.'); if(mo) mo.focus(); return; }
+  var txt = '¿Estas seguro?\n\n'
+    + (d.fechaCom ? 'Vas a cambiar la fecha para Comercial de ' + d.fechaCom + ' a ' + aDMA(v)
+                  : 'Vas a confirmar a Comercial la fecha ' + aDMA(v))
+    + ' para ' + d.lives + ' (' + d.cliente + ').\nComercial la va a poder ver en Seguimiento de protos.';
+  if(!confirm(txt)) return;
+  var orden = d.orden;
+  var p = { orden:orden, cambios:[{ campo:'FECHA_COM', valor:v }], motivo:motivo, usuario:usuario };
+  p.token = tokenPara(btn, p);
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  var w = conEspera(btn, 'REINTENTAR',
+    function(r){
+      if(!r || !r.ok){ btn.disabled=false; btn.textContent='REINTENTAR'; alert(r && r.msg); return; }
+      refrescarTodo(); verFicha(orden);
+    },
+    function(e){ btn.disabled=false; btn.textContent='REINTENTAR'; alert('Se corto la conexion: ' + e.message); });
+  google.script.run.withSuccessHandler(w.ok).withFailureHandler(w.mal).editarEstilo(p);
+}
+
+function panelEspera(){
+  var d = FICHA;
+  var opc = [['AVIOS','Avios del cliente (hilos, elasticos...)'], ['TELA','Tela del cliente'], ['PINNED','Pinned']];
+  var sel = '<select id="eTipo">';
+  for(var i=0;i<opc.length;i++) sel += '<option value="' + opc[i][0] + '"' + (d.espera === opc[i][0] ? ' selected' : '') + '>' + opc[i][1] + '</option>';
+  sel += '</select>';
+  document.getElementById('fcuerpo').innerHTML =
+      '<div class="rot">' + (d.espera ? 'Cambiar la espera' : 'Poner en espera del cliente') + '</div>'
+    + campo('Que se espera', sel)
+    + campo('Motivo (Comercial lo ve)', '<textarea id="eMot" rows="2" placeholder="Ej.: espera de elasticos que tiene que enviar el cliente">'
+        + esc(d.esperaMotivo || '') + '</textarea>')
+    + campo('Fecha en que llega', '<input type="date" id="eLlega" value="' + esc(aISO(d.esperaLlega)) + '">')
+    + '<div class="hint">Mientras este en espera, el estilo sale del aviso de estilos sin fecha para Comercial, '
+    +   'y Comercial lo ve en su seccion de espera. El dia que llega, el programa te avisa para revisarlo.</div>'
+    + '<div class="fbtns"><button class="bEdi" onclick="volverFicha()">Cancelar</button>'
+    + '<button class="bReg" onclick="guardarEspera(this)">GUARDAR</button></div>';
+}
+
+function guardarEspera(btn){
+  if(!usuario){ cambiarNombre(); if(!usuario) return; }
+  var orden = FICHA.orden;
+  var p = { orden:orden, tipo:document.getElementById('eTipo').value,
+            motivo:document.getElementById('eMot').value.trim(),
+            fecha:document.getElementById('eLlega').value, usuario:usuario };
+  if(!p.motivo){ alert('Escribe el motivo: Comercial lo va a ver.'); document.getElementById('eMot').focus(); return; }
+  if(!p.fecha){ alert('Pon la fecha en que llega.'); return; }
+  p.token = tokenPara(btn, p);
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  var w = conEspera(btn, 'REINTENTAR',
+    function(r){
+      if(!r || !r.ok){ btn.disabled=false; btn.textContent='REINTENTAR'; alert(r && r.msg); return; }
+      refrescarTodo(); verFicha(orden);
+    },
+    function(e){ btn.disabled=false; btn.textContent='REINTENTAR'; alert('Se corto la conexion: ' + e.message); });
+  google.script.run.withSuccessHandler(w.ok).withFailureHandler(w.mal).ponerEnEspera(p);
+}
+
+function llegoEspera(btn, ordenLista){
+  if(!usuario){ cambiarNombre(); if(!usuario) return; }
+  var orden = ordenLista || FICHA.orden;
+  if(!confirm('¿Ya llego?\n\nEl estilo sale de espera y vuelve al aviso de estilos sin fecha para Comercial.')) return;
+  var p = { orden:orden, usuario:usuario };
+  p.token = tokenPara(btn, p);
+  btn.disabled = true; btn.innerHTML = '...';
+  var w = conEspera(btn, 'REINTENTAR',
+    function(r){
+      if(!r || !r.ok){ btn.disabled=false; btn.textContent='REINTENTAR'; alert(r && r.msg); return; }
+      refrescarTodo();
+      if(ordenLista){ var row = document.getElementById('es_' + orden); if(row) row.innerHTML = '<td colspan="7" class="listo">&#10003; Llego: sale de espera</td>'; }
+      else verFicha(orden);
+    },
+    function(e){ btn.disabled=false; btn.textContent='REINTENTAR'; alert('Se corto la conexion: ' + e.message); });
+  google.script.run.withSuccessHandler(w.ok).withFailureHandler(w.mal).terminarEspera(p);
 }
 
 function volverFicha(){
