@@ -853,6 +853,9 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
   .fnew button[disabled]{background:#9aa0a6;}
   /* la ultima columna (los botones) toma solo lo que necesita */
   .fnew td:last-child{width:1%;white-space:nowrap;}
+  /* ventana de Comercial: la fila se puede tocar para abrir la ficha */
+  .fnew tr.nfila{cursor:pointer;}
+  .fnew tr.nfila:hover td{background:#F6FAF8;}
   .fnew select{padding:8px 10px;border:1px solid var(--linea);border-radius:7px;
                font-size:14px;font-family:inherit;background:#fff;min-width:130px;}
   /* buscador: requerimiento y despacho al costado de la talla, etiqueta gris
@@ -1553,23 +1556,27 @@ html.lsPoOn body>*:not(#lsPo){visibility:hidden!important}
     });
   }
 
+  /* Estilos sin fecha para Comercial (José, 20/10): requerimientos de Comercial (sin ANALISTA) en proceso
+     que todavia no tienen su fecha para Comercial, nuevos o de antes. Lo de Desarrollo e Ingenieria no
+     tiene aviso: Desarrollo maneja esas fechas directamente. */
   function getNuevos(){
     return cargar().then(function(){
       if (!WM.des) return { ok:true, filas:[], desde:DATOS.ordenDesde, hora:_hora() };
-      var conf = {}; (DATOS.confirmadas || []).forEach(function(o){ conf[String(o)] = true; });
       var out = [];
-      for (var i = 0; i < DATOS.filas.length && out.length < 100; i++){
-        var f = DATOS.filas[i], orden = _txt(f.orden), n = Number(orden);
-        if (!orden || isNaN(n) || n < DATOS.ordenDesde) continue;
+      for (var i = 0; i < DATOS.filas.length; i++){
+        var f = DATOS.filas[i], orden = _txt(f.orden);
+        if (!orden) continue;
         var st = _norm(f.status);
-        if (st === 'CANCELADO' || st === 'ENTREGADO') continue;
-        if (conf[orden]) continue;
+        if (!st || FUERA_DEL_PROGRAMA.indexOf(st) !== -1) continue;
+        if (_txt(f.analista)) continue;
+        if (_fecha(f.fechaCom)) continue;
+        if (/^#/.test(_txt(f.lives))) continue;
         var fxf = _fecha(f.xf);
         out.push({ orden:orden, lives:_txt(f.lives), cliente:_txt(f.cliente), grupo:_txt(f.grupo), fase:_txt(f.fase),
                    combo:_txt(f.combo), cant:_txt(f.cant), talla:_txt(f.talla), status:_txt(f.status), freq:_txt(f.freq),
                    xf: fxf ? _fechaTexto(fxf) : '', iso: fxf ? _iso(fxf) : '',
-                   origen: _txt(f.analista) ? (_terminaEnCorte(f.fase) ? 'INGENIERIA' : 'DESARROLLO') : 'COMERCIAL', minutos:_num(f.minutos),
-                   quien: _txt(f.analista) || _txt(f.ejecutiva), fechaCom: _fecha(f.fechaCom) ? _fechaTexto(_fecha(f.fechaCom)) : '' });
+                   origen:'COMERCIAL', minutos:_num(f.minutos),
+                   quien: _txt(f.ejecutiva), fechaCom:'' });
       }
       out.sort(function(a, b){ return Number(b.orden) - Number(a.orden); });
       return { ok:true, filas:out, desde:DATOS.ordenDesde, hora:_hora(), hayCom:true };
@@ -2112,7 +2119,7 @@ var AREA = (new URLSearchParams(location.search).get('area') || '').toLowerCase(
 /* Marca del archivo, para saber si lo que corre es lo ultimo que se
    entrego. No se muestra en pantalla: se consulta escribiendo VERSION
    en la consola del navegador (F12 -> Consola). */
-var VERSION = 'build 19oct-2 / supabase-3';
+var VERSION = 'build 20oct-1 / supabase-4';
 
 var usuario = '', PREVIEW = null;
 var PE = { filas:[], semana:'TODAS', status:'TODOS', tope:0, hora:'' };
@@ -3052,14 +3059,58 @@ function avisoMinutaje(){
   if(r.falta.length) t.push('<b>' + r.falta.length + ' sin minutaje</b>');
   if(r.cero.length)  t.push('<b>' + r.cero.length + ' con minutaje 0</b>');
 
-  b.innerHTML = '<button class="nuevos" onclick="verSinMinutaje()">'
+  b.innerHTML = '<button class="nuevos" onclick="verMinutajeVentana()">'
     + '<div>&#9679; ' + t.join(' &middot; ')
     + '<br><span style="font-size:13px;color:#5f6368">'
-    + 'Solo los que siguen en proceso. Se completan con el &#9881; de cada fila.'
+    + 'Solo los que siguen en proceso. Toca VER y ponles el minutaje con el engranaje &#9881;.'
     + '</span></div><div class="ir">VER</div></button>';
 }
 
-function verSinMinutaje(){
+/* El minutaje se completa en esta ventana (José, 20/10): los estilos en proceso sin minutaje y los
+   que tienen 0, cada uno con su engranaje. Engranaje -> se escribe -> check y queda guardado.
+   En las tarjetas del buscador no hay engranaje. */
+function textoMinutaje(r){
+  var t = [];
+  if(r.falta.length) t.push(r.falta.length + ' sin minutaje');
+  if(r.cero.length)  t.push(r.cero.length + ' con minutaje 0');
+  t.push(t.length ? 'en proceso' : 'todo completo');
+  return t.join(' &middot; ');
+}
+
+function verMinutajeVentana(){
+  var r = sinMinutaje();
+  if(!r.falta.length && !r.cero.length) return;
+  var orden = function(a, b){ return Number(b.orden) - Number(a.orden); };
+  r.falta.sort(orden); r.cero.sort(orden);
+  var tabla = function(lista){
+    var h = '<div class="scroll"><table class="fnew"><tr><th>ORDEN</th><th>ESTILO</th><th>CLIENTE</th><th>FASE</th>'
+          + '<th>STATUS</th><th>DESPACHO</th><th>MINUTAJE</th></tr>';
+    for(var i=0;i<lista.length;i++){
+      var x = lista[i];
+      h += '<tr><td><b>' + esc(x.orden) + '</b></td>'
+        + '<td><b>' + esc(x.lives) + '</b><br><span style="font-size:11px;color:#5f6368">' + esc(x.combo) + '</span></td>'
+        + '<td>' + esc(x.cliente) + '<br><span style="font-size:11px;color:#5f6368">' + esc(x.grupo) + '</span></td>'
+        + '<td>' + esc(x.fase) + '</td><td>' + esc(x.status) + '</td>'
+        + '<td>' + esc(x.xf || 'sin fecha') + '</td>'
+        + '<td class="minCel" id="mnM_' + x.orden + '">' + minCelda('mnM_', x.orden, x.minutos) + '</td></tr>';
+    }
+    return h + '</table></div>';
+  };
+  var h = '<div class="fondo"><div class="ficha" style="max-width:1100px">'
+    + '<div class="fcab"><div class="fci">'
+    +   '<div class="fl">Estilos para completar el minutaje</div>'
+    +   '<div class="fd" id="minN">' + textoMinutaje(r) + '</div>'
+    + '</div><button class="cerrar" onclick="cerrarFicha()">&#10005;</button></div>'
+    + '<div class="fcuerpo">';
+  if(r.falta.length) h += '<div class="rot">Sin minutaje (' + r.falta.length + ')</div>' + tabla(r.falta);
+  if(r.cero.length)  h += '<div class="rot" style="margin-top:18px">Con minutaje 0 (' + r.cero.length + ')</div>' + tabla(r.cero);
+  h += '<div class="hint">Toca el engranaje &#9881;, escribe el minutaje por prenda y dale al check &#10003;. '
+     + 'Si todavia no se sabe cuanto demora, puedes poner 0.</div></div></div></div>';
+  abrirModal(h);
+}
+
+function verSinMinutaje(){ return verMinutajeVentana(); }
+function verSinMinutajeAntes(){
   BQ.soloSinMin = true;
   document.getElementById('bqTexto').value = '';
   document.getElementById('bqEstado').value = 'TODAS';
@@ -3377,7 +3428,7 @@ function minListo(orden, valor){
     for(var i=0;i<listas[a].length;i++)
       if(listas[a][i].orden === orden) listas[a][i].minutos = valor;
 
-  ['mnN_','mnB_'].forEach(function(pref){
+  ['mnN_','mnB_','mnM_'].forEach(function(pref){
     var c = document.getElementById(pref + orden);
     if(c) c.innerHTML = minCelda(pref, orden, valor);
   });
@@ -3390,6 +3441,8 @@ function minListo(orden, valor){
     b.onclick = function(){ confirmar(b, orden); };
   }
   if(document.getElementById('bqAviso') && BQ.filas.length) avisoMinutaje();
+  var mn = document.getElementById('minN');          // la ventana del minutaje, si esta abierta
+  if(mn && BQ.filas.length) mn.innerHTML = textoMinutaje(sinMinutaje());
   if(PE.filas.length) verMinutaje(visibles());
   refrescarTodo();
 }
@@ -4265,6 +4318,7 @@ document.getElementById('coTexto').addEventListener('input', function(){
    por confirmar" hasta que se la des aca. La primera vez no pide motivo. */
 var SFC = null;
 function cargarSinFechaComercial(){
+  return;   // José, 20/10: ya va todo en el aviso "sin fecha para Comercial"
   google.script.run
     .withSuccessHandler(function(r){
       var b = document.getElementById('barraComercial');
@@ -4657,62 +4711,47 @@ function cargarNuevos(){
     .withFailureHandler(function(){})
     .getNuevos();
 }
-function pendDes(){ return ((NUEVOS && NUEVOS.filas) || []).filter(function(x){ return x.origen !== 'COMERCIAL'; }); }
-function pendComN(){ return ((NUEVOS && NUEVOS.filas) || []).filter(function(x){ return x.origen === 'COMERCIAL'; }); }
-function pendSfc(){ return (SFC && SFC.ok && SFC.filas) || []; }
-var VN_TIPO = 'com';
-function nPend(t){ return t === 'des' ? pendDes().length : pendComN().length + pendSfc().length; }
-function barraPend(tipo, n, titulo, sub){
-  return n ? '<button class="nuevos" onclick="verNuevos(\'' + tipo + '\')">'
-    + '<div>&#9679; <b>' + n + ' ' + titulo + '</b>'
-    + '<br><span style="font-size:13px;color:#5f6368">' + sub + '</span></div>'
-    + '<div class="ir">VER</div></button>' : '';
-}
-/* Dos avisos (José, 19/10): uno para lo de Desarrollo e Ingenieria (se confirma la fecha del WIP) y
-   otro solo para lo de Comercial (fecha del WIP + fecha para Comercial). En los dos va el engranaje. */
+function pendComN(){ return (NUEVOS && NUEVOS.filas) || []; }
+function nPend(){ return pendComN().length; }
+/* Un solo aviso en el Programa WIP (José, 20/10): "sin fecha para Comercial". El de Desarrollo e
+   Ingenieria se quito: esas fechas las maneja Desarrollo directamente. Dar fechas es de Desarrollo. */
 function pintarBarraPend(){
   var bn = document.getElementById('barraNuevos'), b = document.getElementById('barraComercial');
-  if(bn) bn.innerHTML = barraPend('des', nPend('des'), 'estilo(s) de Desarrollo e Ingenieria sin fecha confirmada',
-                                  'Entraron con fecha automatica. Revisalas y confirmalas.');
-  if(b) b.innerHTML = barraPend('com', nPend('com'), 'estilo(s) sin fecha para Comercial',
-                                'Comercial los ve como "fecha por confirmar" hasta que les des la suya.');
+  if(b) b.innerHTML = '';
+  if(!bn) return;
+  var n = nPend();
+  bn.innerHTML = (AREA || !n) ? '' : '<button class="nuevos" onclick="verNuevos()">'
+    + '<div>&#9679; <b>' + n + ' estilo(s) sin fecha para Comercial</b>'
+    + '<br><span style="font-size:13px;color:#5f6368">Revisa la fecha del WIP y dales su fecha para Comercial. '
+    + 'Comercial los ve como "fecha por confirmar" hasta que confirmes.</span></div>'
+    + '<div class="ir">VER</div></button>';
 }
+function textoNuevos(n){ return n + ' por confirmar &middot; requerimientos de Comercial en proceso'; }
 function contarPend(){
   var c = document.getElementById('pendN');
-  if(c) c.textContent = nPend(VN_TIPO) + (VN_TIPO === 'des' ? ' por confirmar' : ' por asignar');
+  if(c) c.innerHTML = textoNuevos(nPend());
   pintarBarraPend();
-  if(!nPend(VN_TIPO)) cerrarFicha();
+  if(!nPend()) cerrarFicha();
 }
 
-function verNuevos(tipo){
-  tipo = (tipo === 'des') ? 'des' : 'com';
-  VN_TIPO = tipo;
-  if(!nPend(tipo)) return;
-  var esCom = (tipo === 'com');
-  var f = esCom ? pendComN() : pendDes();
-  var g = esCom ? pendSfc() : [];
-
+function verNuevos(){
+  if(!nPend()) return;
+  var f = pendComN();
   var h = '<div class="fondo"><div class="ficha" style="max-width:1250px">'
     + '<div class="fcab"><div>'
-    +   '<div class="fl">' + (esCom ? 'Estilos sin fecha para Comercial' : 'Estilos de Desarrollo e Ingenieria sin fecha confirmada') + '</div>'
-    +   '<div class="fd" id="pendN">' + nPend(tipo) + (esCom ? ' por asignar' : ' por confirmar') + '</div>'
+    +   '<div class="fl">Estilos sin fecha para Comercial</div>'
+    +   '<div class="fd" id="pendN">' + textoNuevos(f.length) + '</div>'
     + '</div><button class="cerrar" onclick="cerrarFicha()">&#10005;</button></div>'
     + '<div class="fcuerpo"><div class="scroll"><table class="fnew"><tr>'
     + '<th>ORDEN</th><th>ESTILO</th><th>CLIENTE</th><th>FASE</th>'
-    + '<th>CANT</th><th>REQUERIDA</th><th>MINUTAJE</th><th>DESPACHO WIP</th>'
-    + (esCom ? '<th>PARA COMERCIAL</th>' : '')
-    + '<th></th></tr>';
-
+    + '<th>CANT</th><th>REQUERIDA</th><th>DESPACHO WIP</th><th>PARA COMERCIAL</th><th></th></tr>';
   for(var i=0;i<f.length;i++){
     var x = f[i];
-    // el 0 es un minutaje valido: hay estilos nuevos sin tiempo conocido.
-    // Lo que no vale es que este en blanco.
-    var tieneMin = (x.minutos !== '' && x.minutos !== null &&
-                    x.minutos !== undefined && !isNaN(Number(x.minutos)));
-    h += '<tr id="n_' + x.orden + '">'
-      + '<td><b>' + esc(x.orden) + '</b><br>'
-      +   '<span class="org' + (x.origen!=='COMERCIAL'?' des':'') + '">'
-      +   esc(x.origen) + '</span></td>'
+    /* tocar el estilo abre su ficha (por ejemplo, si todavia no se le puede
+       dar fecha porque espera avios o algo del cliente) */
+    h += '<tr id="n_' + x.orden + '" class="nfila" title="Toca para abrir la ficha del estilo" '
+       +   'onclick="if(!event.target.closest(\'input,button\')){ cerrarFicha(); verFicha(\'' + x.orden + '\'); }">'
+      + '<td><b>' + esc(x.orden) + '</b></td>'
       + '<td><b>' + esc(x.lives) + '</b><br>'
       +   '<span style="font-size:11px;color:#5f6368">' + esc(x.combo) + '</span></td>'
       + '<td>' + esc(x.cliente) + '<br>'
@@ -4721,50 +4760,17 @@ function verNuevos(tipo){
       + '<td>' + esc(x.cant) + '<br>'
       +   '<span style="font-size:11px;color:#5f6368">T ' + esc(x.talla) + '</span></td>'
       + '<td>' + esc(x.freq) + '</td>'
-      + '<td class="minCel" id="mnN_' + x.orden + '">' + minCelda('mnN_', x.orden, x.minutos) + '</td>'
       + '<td><input type="date" id="fx_' + x.orden + '" value="' + esc(x.iso) + '"></td>'
-      /* la fecha que se le da a Comercial: igual o despues que la del WIP.
-         Si ya tenia una, aca solo se muestra: se cambia desde EDITAR, con motivo. */
-      + (esCom ? '<td>' + (x.fechaCom
-                  ? '<b>' + esc(x.fechaCom) + '</b><br><span style="font-size:11px;color:#5f6368">ya dada</span>'
-                  : '<input type="date" class="fcom" id="fc_' + x.orden + '" value="' + esc(x.iso) + '">') + '</td>' : '')
-      + '<td>' + (tieneMin
-            ? '<button id="cf_' + x.orden + '" onclick="confirmar(this,\'' + x.orden + '\')">CONFIRMAR</button>'
-            : '<button id="cf_' + x.orden + '" disabled title="Ponle el minutaje con el engranaje">SIN MINUTAJE</button>')
-      + '</td>'
-      + '</tr>';
-  }
-  // los que ya tienen fecha del WIP: solo falta la de Comercial
-  for(var k=0;k<g.length;k++){
-    var y = g[k];
-    h += '<tr id="sfc_' + y.orden + '">'
-      + '<td><b>' + esc(y.orden) + '</b><br><span class="org">COMERCIAL</span></td>'
-      + '<td><b>' + esc(y.lives) + '</b><br>'
-      +   '<span style="font-size:11px;color:#5f6368">' + esc(y.combo) + '</span></td>'
-      + '<td>' + esc(y.cliente) + '<br>'
-      +   '<span style="font-size:11px;color:#5f6368">' + esc(y.grupo) + '</span></td>'
-      + '<td>' + esc(y.fase) + '</td>'
-      + '<td>' + esc(y.cant) + '<br>'
-      +   '<span style="font-size:11px;color:#5f6368">T ' + esc(y.talla) + '</span></td>'
-      + '<td>' + esc(y.freq) + '</td>'
-      + '<td class="minCel" id="mnN_' + y.orden + '">' + minCelda('mnN_', y.orden, y.minutos) + '</td>'
-      + '<td><b>' + esc(y.xf || 'sin fecha') + '</b><br><span style="font-size:11px;color:#5f6368">ya confirmada</span></td>'
-      + '<td><input type="date" class="fcom" id="sfx_' + y.orden + '" value="' + esc(y.iso) + '"></td>'
-      + '<td><button onclick="asignarFechaCom(this,\'' + y.orden + '\',\'' + esc(y.iso) + '\')">ASIGNAR</button></td>'
+      + '<td><input type="date" class="fcom" id="fc_' + x.orden + '" value="' + esc(x.iso) + '"></td>'
+      + '<td><button id="cf_' + x.orden + '" onclick="confirmar(this,\'' + x.orden + '\')">CONFIRMAR</button></td>'
       + '</tr>';
   }
   h += '</table></div>'
-    + '<div class="hint">Sin <b>minutaje</b> no se puede confirmar: es lo que dice cuanto '
-    + 'demora la prenda, y con eso se evalua si la fecha de despacho alcanza. '
-    + 'Se pone aqui mismo con el engranaje &#9881; de la columna minutaje, '
-    + 'o abriendo el estilo &rarr; <b>EDITAR</b>. '
-    + 'Si todavia no se sabe cuanto demora, pon <b>0</b>.<br>'
-    + 'La fecha viene calculada; si esta bien, solo confirma.'
-    + (esCom ? '<br>La fecha <b>para Comercial</b> viene propuesta igual a la del WIP: puede ser igual o despues, nunca antes. '
-             + 'Al confirmar o asignar, el estilo sale de esta lista y Comercial ve su fecha en Seguimiento de protos.'
-             : ' Al confirmar sale de esta lista.') + '</div>'
+    + '<div class="hint">Revisa la fecha del WIP y dale a Comercial la suya (igual o despues). '
+    + 'Al confirmar, Comercial la ve en Seguimiento de protos y el estilo sale de esta lista.<br>'
+    + 'Si un estilo todavia no puede tener fecha (espera avios o algo del cliente), '
+    + '<b>tocalo</b> para abrir su ficha.</div>'
     + '</div></div></div>';
-
   abrirModal(h);
 }
 
@@ -4783,6 +4789,16 @@ function confirmar(btn, orden){
       fcIn.focus(); return;
     }
   }
+
+  // Comercial lo va a ver: se pregunta antes de confirmar (si se cancela, no se guarda nada)
+  var xr = null, L0 = pendComN();
+  for(var q=0; q<L0.length; q++) if(L0[q].orden === orden) xr = L0[q];
+  var quien = xr ? (xr.lives + (xr.cliente ? ' (' + xr.cliente + ')' : '')) : ('la orden ' + orden);
+  var texto = fechaCom
+    ? '\u00bfEstas seguro?\n\nVas a confirmar a Comercial la fecha ' + aDMA(fechaCom) + ' para ' + quien + '.\n'
+      + 'Comercial la va a poder ver en Seguimiento de protos.'
+    : '\u00bfEstas seguro?\n\nVas a confirmar la fecha ' + aDMA(inp.value) + ' para ' + quien + '.';
+  if(!confirm(texto)) return;
 
   var p = { orden:orden, fecha:inp.value, fechaCom:fechaCom, usuario:usuario };
   p.token = tokenPara(btn, p);
@@ -5242,7 +5258,7 @@ function elegir(cod){
 
     h += '<div class="campo"><label>Partida (obligatoria)</label>'
        +   '<input id="fPartida" value="' + esc(FICHA.partida || '') + '"'
-       +   ' placeholder="elige la partida o escribela" autocomplete="off"'
+       +   ' placeholder="numero de partida de la tela" autocomplete="off"'
        +   ' oninput="limpiarMarca(\'fPartida\')">'
        +   '<div class="malmsg" id="m_fPartida"></div>'
        +   '<div class="hint">Es lo que amarra la prenda con la tela que se uso. '
@@ -5310,7 +5326,6 @@ function elegir(cod){
      + '</button></div>';
   document.getElementById('detReg').innerHTML = h;
   persPintarTodos();
-  listaPartidas('fPartida');
 }
 
 /* Las areas eligen de la lista cerrada; Desarrollo puede agregar a alguien. */
