@@ -17,6 +17,7 @@ Seguimiento de muestras (protos) de Planta Barranco, por área.
 - WIP, leer: `wm_inicio` (permisos de la persona), `wm_datos` (carga todo: `wm_ordenes`, `wm_base`, `wm_movimientos`, `wm_clientes`, `wm_personas`, `wm_config`, `wm_feriados`, `wm_fases_dias`, `wm_servicio_cliente`), `wm_ficha_datos`, `wm_registros_etapas` (Excel), `wm_ultimo_comercial`, `wm_catalogo_telas`.
 - WIP, registrar: `wm_registrar`, `wm_novedad`, `wm_editar`, `wm_confirmar_fecha`, `wm_avios`, `wm_confirmar_servicio`, `wm_comentario`, `wm_quitar_comentarios`, `wm_guardar_ingreso`, `wm_guardar_desarrollo`, `wm_espera`, `wm_fin_espera` (tablas `wm_ordenes`, `wm_base`, `wm_movimientos`; `wm_tokens` evita guardar dos veces).
 - Telas: `tl_inicio` (leer) y `tl_registrar`, `tl_editar`, `tl_marcar`, `tl_desmarcar`, `tl_devolver` (tabla `tl_telas`, historial en `tl_movimientos`).
+- Selección desde la base (desde el 11/11/2026): lo que existe en `ops` o `partidas` se elige, no se escribe; si no está, se toma de lo ya registrado; un proto sin OP (su número de estilo no está en `ops`) se puede escribir. Lectura `wm_catalogo_base`; `wm_guardar_desarrollo` y `wm_editar` validan código, color y partida con `wm_valida_base_` (solo lo que se envía o se cambia). En Requerimiento de Desarrollo el estilo va en dos casillas (número y versión). No aplica al ingreso de Comercial (pegar del Excel) ni al Inventario de telas.
 - No usa Storage ni lee tablas directo.
 
 ## Quién la usa
