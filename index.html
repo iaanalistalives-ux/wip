@@ -1235,6 +1235,14 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
     <div class="filtros">
       <div class="fila1">
         <div class="cel">
+          <div class="etf">Ver</div>
+          <select id="coVer" onchange="CO.tope=CO_TOPE;pintarFiltrosComercial();pintarComercial()">
+            <option value="PROCESO">En proceso</option>
+            <option value="ENTREGADOS">Entregados</option>
+            <option value="TODOS">Todos</option>
+          </select>
+        </div>
+        <div class="cel">
           <div class="etf">Cliente</div>
           <select id="coCliente" onchange="CO.tope=CO_TOPE;pintarComercial()"></select>
         </div>
@@ -1975,20 +1983,31 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
       return { ok:true, filas:out };
     });
   }
+  /* Fecha en que se entrego a Comercial: la del hito "Entregado"; los que vienen
+     del Excel antiguo no la tienen y usan su fecha de despacho del WIP. */
+  function _fechaEntregado(entrega, xf){
+    var fe = _fecha(entrega) || _fecha(xf);
+    return fe ? { txt:_fechaTexto(fe), iso:_iso(fe), dia:DIAS_SEMANA[fe.getDay()] } : null;
+  }
   function getSeguimiento(){
     return cargar().then(function(){
       var camb = {}; (DATOS.comCambiada || []).forEach(function(o){ camb[String(o)] = true; });
       var out = [];
       DATOS.filas.forEach(function(f){
         var orden = _txt(f.orden); if (!orden) return;
-        var st = _norm(f.status); if (!st || FUERA_DEL_PROGRAMA.indexOf(st) !== -1) return;
+        var st = _norm(f.status), ent = (st === 'ENTREGADO');
+        if (!st || (!ent && FUERA_DEL_PROGRAMA.indexOf(st) !== -1)) return;   // entregados: Comercial los ve con el filtro "Ver" (23/11/2026)
         if (_txt(f.analista)) return;                       // lo pidio Desarrollo o Ingenieria
         var fc = _fecha(f.fechaCom), cant = _num(f.cant), fr = _fecha(f.freq);
         var o = { orden:orden, lives:_txt(f.lives), estcli:_txt(f.estcli), cliente:_txt(f.cliente), grupo:_txt(f.grupo),
                   fase:_txt(f.fase), combo:_txt(f.combo), cant:(cant === '' ? '' : cant), talla:_txt(f.talla), status:_txt(f.status),
                   fechaCom: fc ? _fechaTexto(fc) : '', comIso: fc ? _iso(fc) : '', dia: fc ? DIAS_SEMANA[fc.getDay()] : '',
-                  cambiada: !!camb[orden], freq: fr ? _fechaTexto(fr) : '' };
-        var es = _espera(f);
+                  cambiada: !!camb[orden], freq: fr ? _fechaTexto(fr) : '', entregado: ent };
+        if (ent){
+          var fe = _fechaEntregado(f.entrega, f.xf);
+          o.entFecha = fe ? fe.txt : ''; o.entIso = fe ? fe.iso : ''; o.entDia = fe ? fe.dia : '';
+        }
+        var es = ent ? {} : _espera(f);
         o.espera = es.espera; o.esperaMotivo = es.esperaMotivo; o.esperaLlega = es.esperaLlega;
         o.busq = _norm([o.orden, o.lives, o.estcli, o.cliente, o.grupo, o.combo, o.fase, o.talla, o.status].join(' '));
         out.push(o);
@@ -2004,9 +2023,21 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
       var ruta = [], hoy = null;
       for (var i = 0; i < d.ruta.length; i++){
         var it = d.ruta[i];
-        if (it.hoy){ hoy = { q:it.q, c:'Situacion de hoy', cam:true, hoy:true, fin:it.fin }; continue; }
+        if (it.hoy){
+          hoy = { q:it.q, c:'Situacion de hoy', cam:true, hoy:true, fin:it.fin };
+          /* Ultimo punto de la ruta: entregado, con su fecha (pedido de Comercial, 23/11/2026) */
+          if (_norm(d.status) === 'ENTREGADO'){
+            var fEnt = '';
+            for (var h2 = 0; h2 < d.hitos.length; h2++) if (d.hitos[h2].cod === 'ENTREGA') fEnt = d.hitos[h2].fecha;
+            var fe = _fechaEntregado(fEnt, d.xf);
+            hoy = { q:'ENTREGADO' + (fe ? '  —  ' + fe.txt : ''), c:'Entregado a Comercial', cam:false, hoy:true, fin:true };
+          }
+          continue;
+        }
         if (it.com) continue;
         var q = _norm(it.q);
+        /* entregado: el hito de entrega (sale como INSPECCION) ya va como ultimo punto "ENTREGADO" */
+        if (_norm(d.status) === 'ENTREGADO' && /^(INSPECCION|ENTREGA|ENTREGADO)$/.test(q)) continue;
         var sirve = /^(TELA|MOLDE|CORTE|COSTURA|INSPECCION|ENTREGA)\b/.test(q)
                  || q.indexOf('ENVIADO A SERVICIO') >= 0 || q.indexOf('SERVICIO \u00b7 VUELVE') === 0
                  || q.indexOf('AVIOS LLEGARON') === 0;
@@ -4247,17 +4278,28 @@ function cargarComercial(){
     .getSeguimiento();
 }
 
+/* Filtro "Ver" (pedido de Comercial, 23/11/2026): en proceso (como siempre),
+   entregados o todos. */
+function enVerComercial(f){
+  var v = document.getElementById('coVer').value || 'PROCESO';
+  if(v === 'PROCESO') return !f.entregado;
+  if(v === 'ENTREGADOS') return !!f.entregado;
+  return true;
+}
+
 function pintarFiltrosComercial(){
-  var cli = {}, st = {};
+  var cli = {}, st = {}, tot = 0;
   for(var i=0;i<CO.filas.length;i++){
     var f = CO.filas[i];
+    if(!enVerComercial(f)) continue;
+    tot++;
     cli[f.cliente] = (cli[f.cliente] || 0) + 1;
     st[f.status]   = (st[f.status] || 0) + 1;
   }
   var opc = function(id, mapa, todos){
     var sel = document.getElementById(id), actual = sel.value || 'TODOS';
     var ks = Object.keys(mapa).sort();
-    var h = '<option value="TODOS">' + todos + '  (' + CO.filas.length + ')</option>';
+    var h = '<option value="TODOS">' + todos + '  (' + tot + ')</option>';
     for(var k=0;k<ks.length;k++)
       h += '<option value="' + esc(ks[k]) + '"' + (ks[k] === actual ? ' selected' : '') + '>'
          + esc(ks[k] || '(sin dato)') + '  (' + mapa[ks[k]] + ')</option>';
@@ -4272,6 +4314,7 @@ function filtradosComercial(){
   var st = document.getElementById('coStatus').value || 'TODOS';
   var t = norm(document.getElementById('coTexto').value);
   return CO.filas.filter(function(f){
+    if(!enVerComercial(f)) return false;
     if(cl !== 'TODOS' && f.cliente !== cl) return false;
     if(st !== 'TODOS' && f.status !== st) return false;
     if(t.length >= 2 && f.busq.indexOf(t) === -1) return false;
@@ -4288,7 +4331,9 @@ function pintarComercial(){
   if(!lista.length){ c.innerHTML = '<div class="aviso">No hay estilos con ese filtro.</div>'; return; }
   /* primero las secciones de espera (avios, tela, pinned), despues por fecha
      de entrega, y al final los que todavia no tienen fecha */
+  /* los entregados van al final, por fecha de entrega, el mas reciente arriba */
   var grupo = function(f){
+    if(f.entregado) return f.entIso ? '3' + (99999999 - Number(f.entIso.replace(/-/g, ''))) : '4';
     if(f.espera) return '0' + ({ AVIOS:'1', TELA:'2', PINNED:'3' }[f.espera] || '9');
     return f.comIso ? '1' + f.comIso : '2';
   };
@@ -4307,9 +4352,11 @@ function pintarComercial(){
       cerrar(); clave = k;
       var n = 0, pr = 0;
       for(var z=i; z<lista.length && grupo(lista[z]) === k; z++){ n++; if(typeof lista[z].cant === 'number') pr += lista[z].cant; }
-      var esp = k.charAt(0) === '0', iso = k.charAt(0) === '1' ? k.slice(1) : '';
-      cab = '<div class="banda' + (esp ? ' espera' : (!iso ? ' nada' : (iso < hoyC ? ' vieja' : ''))) + '"><div>'
-          + (esp ? (f.espera === 'PINNED' ? 'EN ESPERA PINNED' : 'EN ESPERA DE ' + textoEspera(f.espera).toUpperCase())
+      var esp = k.charAt(0) === '0', ent = (k.charAt(0) === '3' || k.charAt(0) === '4'),
+          iso = k.charAt(0) === '1' ? k.slice(1) : '';
+      cab = '<div class="banda' + (ent ? '' : (esp ? ' espera' : (!iso ? ' nada' : (iso < hoyC ? ' vieja' : '')))) + '"><div>'
+          + (ent ? (f.entFecha ? 'ENTREGADO ' + esc(f.entDia) + ' ' + esc(f.entFecha) : 'ENTREGADO SIN FECHA')
+                 : esp ? (f.espera === 'PINNED' ? 'EN ESPERA PINNED' : 'EN ESPERA DE ' + textoEspera(f.espera).toUpperCase())
                  : (iso ? 'Entrega ' + esc(f.dia) + ' ' + esc(f.fechaCom) : 'FECHA POR CONFIRMAR')) + '</div>'
           + '<div class="sub">' + n + ' estilo' + (n === 1 ? '' : 's') + ' &middot; ' + pr + ' prendas</div></div>';
     }
@@ -4347,7 +4394,7 @@ function filaComercial(f){
     +   '<div class="der">'
     /* la fecha de entrega ya esta en la banda de arriba (verde, o roja si ya
        paso): en la tarjeta no se repite */
-    +     (f.cambiada ? '<span class="chip fcc">Fecha cambiada</span>' : '')
+    +     ((f.cambiada && !f.entregado) ? '<span class="chip fcc">Fecha cambiada</span>' : '')
     +     '<span class="chip st">' + esc(f.status) + '</span>'
     +     '<div class="num"><div class="qty">' + esc(f.cant) + '</div><div class="qtye">prendas</div></div>'
     +   '</div>'
@@ -4373,8 +4420,9 @@ function verFichaComercial(orden){
         +     '<div class="fdfila">'
         +       (d.espera ? '<div class="fdi mal"><div class="fdl">En espera de ' + esc(textoEspera(d.espera)) + '</div>'
                           + '<div class="fdv">llega ' + esc(d.esperaLlega || '-') + '</div></div>' : '')
-        +       '<div class="fdi' + (d.fechaCom ? '' : ' mal') + '"><div class="fdl">Entrega</div>'
-        +       '<div class="fdv">' + (d.fechaCom ? esc(d.fechaCom) : 'POR CONFIRMAR') + '</div></div></div>'
+        +       ((!d.fechaCom && norm(d.status) === 'ENTREGADO') ? ''
+                 : '<div class="fdi' + (d.fechaCom ? '' : ' mal') + '"><div class="fdl">Entrega</div>'
+                 + '<div class="fdv">' + (d.fechaCom ? esc(d.fechaCom) : 'POR CONFIRMAR') + '</div></div>') + '</div>'
         +     '<div class="fdfila"><div class="fdi"><div class="fdl">Status</div>'
         +       '<div class="fdv">' + esc(d.status) + '</div></div></div>'
         +   '</div>'
@@ -4383,7 +4431,7 @@ function verFichaComercial(orden){
         +   (d.espera && d.esperaMotivo ? '<div class="aviso">En espera de ' + esc(textoEspera(d.espera)) + ' del cliente: '
                 + esc(d.esperaMotivo) + '</div>' : '')
         +   '<div class="rot">Como va</div>' + htmlRuta(d.ruta || [])
-        +   (d.fechaCom ? '' : '<div class="hint">Desarrollo todavia no confirma la fecha de entrega de este estilo.</div>')
+        +   ((d.fechaCom || norm(d.status) === 'ENTREGADO') ? '' : '<div class="hint">Desarrollo todavia no confirma la fecha de entrega de este estilo.</div>')
         + '</div></div></div>';
       abrirModal(h);
     })
