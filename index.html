@@ -2053,11 +2053,14 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
           continue;
         }
         if (t !== 'FECHA COMERCIAL' && t !== 'CAMBIO FECHA COMERCIAL') continue;
-        ruta.push({ q: t === 'FECHA COMERCIAL' ? 'FECHA DE ENTREGA  \u2014  ' + mv.despues
-                                               : 'FECHA DE ENTREGA CAMBIADA  \u2014  de ' + mv.antes + ' a ' + mv.despues,
+        ruta.push({ q: t === 'FECHA COMERCIAL' ? 'FECHA COMERCIAL DADA  \u2014  ' + mv.despues
+                                               : 'FECHA COMERCIAL CAMBIADA  \u2014  de ' + mv.antes + ' a ' + mv.despues,
                     c: _soloDia(mv.fecha) + (mv.motivo ? '  \u00b7  Motivo: ' + mv.motivo : ''), cam:true, ts: mv.orden3 || 0 });
       }
       ruta.sort(function(a, b){ return a.ts - b.ts; });
+      /* Fecha comercial = fecha de despacho DDP (José, 23/11/2026): punto propio antes del ultimo */
+      var fCom = _fecha(d.fechaCom);
+      if (fCom) ruta.push({ q:'FECHA COMERCIAL (DDP)  —  ' + _fechaTexto(fCom), c:'Despacho DDP', cam:true, ts:0 });
       if (hoy) ruta.push(hoy);
       return { ok:true, orden:d.orden, lives:d.lives, estcli:d.estcli, cliente:d.cliente, grupo:d.grupo, fase:d.fase,
                combo:d.combo, cant:d.cant, talla:d.talla, status:d.status, fechaCom:d.fechaCom, freq:d.freq, ruta:ruta,
@@ -4421,7 +4424,7 @@ function verFichaComercial(orden){
         +       (d.espera ? '<div class="fdi mal"><div class="fdl">En espera de ' + esc(textoEspera(d.espera)) + '</div>'
                           + '<div class="fdv">llega ' + esc(d.esperaLlega || '-') + '</div></div>' : '')
         +       ((!d.fechaCom && norm(d.status) === 'ENTREGADO') ? ''
-                 : '<div class="fdi' + (d.fechaCom ? '' : ' mal') + '"><div class="fdl">Entrega</div>'
+                 : '<div class="fdi' + (d.fechaCom ? '' : ' mal') + '"><div class="fdl">Fecha comercial</div>'
                  + '<div class="fdv">' + (d.fechaCom ? esc(d.fechaCom) : 'POR CONFIRMAR') + '</div></div>') + '</div>'
         +     '<div class="fdfila"><div class="fdi"><div class="fdl">Status</div>'
         +       '<div class="fdv">' + esc(d.status) + '</div></div></div>'
