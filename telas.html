@@ -1138,13 +1138,23 @@ document.addEventListener('keydown', function(e){
 });
 
 /* ---------- Supabase ---------- */
+/* Puerta única (Wm20): toda llamada tl_xxx va por tl_api(p_accion, p), el contrato que replicará Sistemas. */
+function puerta(fn, args){
+  if (!/^tl_/.test(fn)) return { fn: fn, args: args || {} };
+  var a = args || {}, p = (a.p !== undefined ? a.p : {});
+  if (a.p_ids !== undefined) p.ids = a.p_ids;
+  if (a.p_obs !== undefined) p.obs = a.p_obs;
+  if (a.p_fecha !== undefined) p.fecha = a.p_fecha;
+  return { fn: 'tl_api', args: { p_accion: fn.slice(3), p: p } };
+}
 function rpc(fn, args, ms){
   var ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
   var t = setTimeout(function(){ if (ctl) ctl.abort(); }, ms || 30000);
-  return fetch(CFG_SB.url + '/rest/v1/rpc/' + fn, {
+  var pu = puerta(fn, args);
+  return fetch(CFG_SB.url + '/rest/v1/rpc/' + pu.fn, {
       method: 'POST', cache: 'no-store', signal: ctl ? ctl.signal : undefined,
       headers: { 'Content-Type': 'application/json', apikey: CFG_SB.clave },
-      body: JSON.stringify(args || {})
+      body: JSON.stringify(pu.args)
     }).then(function(r){
       clearTimeout(t);
       return r.text().then(function(txt){
