@@ -27,6 +27,11 @@ Seguimiento de muestras (protos) de Planta Barranco, por área.
   - Fases sugeridas al escribir (`fasesUso` de `wm_datos`): salen de `wm_ordenes.fase` (ya no de `wm_base`, que guarda la fila original tal como se pegó y no se toca) y se omiten las de `wm_config.FASES_NO_VAN` (separadas por coma; función `wm_fase_no_va_`). La casilla sigue siendo de texto libre: no bloquea escribirlas. Las órdenes antiguas con esas fases conservan su fase.
   - Nombres de fase acordados: Size Set, Wear Test (15 días, palabra `WEAR TEST` en `wm_fases_dias`), Pre Top Sample, PP Reference, Prenda OTM, Mock Up (el número o nombre va en la observación). «Mock Up Ingenieria» sigue sin tilde porque está escrita así en `index.html`.
   - Grupos: THYM va SIN guion (THYM1084); VERONICA BEARD es VB-000 (sigla VB en `wm_clientes`). Personas (analista, ejecutiva, historial) con el nombre de Sistemas. Los cortadores siguen por código (9714, A330, A823).
+- Fase por lista cerrada y cortador con nombre (26/11/2026, registro `Wm22`; respuestas de la parte 4 de José Palacios):
+  - Catalogo `wm_fases` (codigo interno `FAS-01`..., nombre, orden, activo): 22 fases. `wm_datos` lo entrega en `fasesCat`. Para agregar o retirar una fase se cambia esa tabla (activo), no el HTML.
+  - `wm_guardar_desarrollo` y `wm_editar` rechazan una fase fuera de la lista (`wm_fase_oficial_`), solo cuando se escribe o se cambia; una orden antigua con otra fase se puede seguir editando. Ingenieria conserva su fase fija. El pegado de Comercial no se rechaza: la pantalla avisa en la revision y se graba igual.
+  - En `index.html` la fase del Requerimiento de Desarrollo es una lista (antes texto libre) y Editar usa la misma lista.
+  - Cortadores: `wm_personas.nombre_completo` (9714 JORGE BERNABE, A330 ROBERT GUTIERREZ, A823 JHONNY MACHACA); `wm_datos` lo entrega en `personasNombre`. Se sigue guardando el codigo; el nombre solo se muestra al lado (campo del corte y ruta de la ficha).
 - No usa Storage ni lee tablas directo.
 
 ## Quién la usa

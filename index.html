@@ -1390,6 +1390,7 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
   function tablas(){
     var t = { siglas:{}, nombres:{}, dias:[], diasDefecto:10, feriados:{},
               personas: DATOS.personas || { COSTURA:[], INSPECCION:[] },
+              personasNombre: DATOS.personasNombre || {},
               servicioCliente: DATOS.servicioCliente || {} };
     (DATOS.clientes || []).forEach(function(c){
       var k = _norm(c.cliente);
@@ -1677,6 +1678,29 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
 
   function _proximoOrden(){ var m = 0; (DATOS.ordenes || []).forEach(function(o){ if (Number(o) > m) m = Number(o); }); return m + 1; }
 
+  /* Lista cerrada de fases (catalogo wm_fases, 26/11/2026). Las mas usadas van arriba.
+     Si la base todavia no entrega el catalogo, se usa la lista de fases en uso, como antes. */
+  function _fasesLista(){
+    var uso = (DATOS.fasesUso || []).map(function(x){ return x.fase; }), cat = DATOS.fasesCat || [];
+    if (!cat.length) return uso;
+    var enCat = {}, out = [], ya = {};
+    cat.forEach(function(x){ enCat[_norm(x)] = x; });
+    uso.forEach(function(x){ var c = enCat[_norm(x)]; if (c && !ya[c]){ ya[c] = true; out.push(c); } });
+    cat.forEach(function(x){ if (!ya[x]){ ya[x] = true; out.push(x); } });
+    return out;
+  }
+  function _faseEnLista(f){
+    var cat = DATOS.fasesCat || []; if (!cat.length) return true;
+    var k = _norm(String(f || '').replace(/[.\s]+$/, ''));
+    for (var i = 0; i < cat.length; i++) if (_norm(cat[i]) === k) return true;
+    return false;
+  }
+  /* Cortador con su nombre al lado del codigo: 9714 -> 9714 \u00b7 JORGE BERNABE. Se sigue guardando el codigo. */
+  function _conNombre(u){
+    var m = DATOS.personasNombre || {}, t = String(u || '');
+    if (!t) return t;
+    return t.split('/').map(function(x){ var c = x.trim(); return m[c] ? (c + ' \u00b7 ' + m[c]) : x; }).join('/');
+  }
   function getOpcionesDesarrollo(){
     return cargar().then(function(){
       var vistos = {}, clientes = [];
@@ -1685,7 +1709,7 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
         clientes.push({ nombre:T.nombres[k] || k, sigla:sg });
       }
       clientes.sort(function(a, b){ return _ordenAlfa(a.nombre, b.nombre); });
-      return { ok:true, clientes:clientes, fases:(DATOS.fasesUso || []).map(function(x){ return x.fase; }),
+      return { ok:true, clientes:clientes, fases:_fasesLista(),
                tallas:TALLAS_SUGERIDAS, proximoOrden:_proximoOrden(), hoy:_hoyIso() };
     });
   }
@@ -1738,6 +1762,7 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
         if (!cliente) pr.push('sin cliente');
         if (!fReq) pr.push('sin fecha requerida, no se pudo calcular XF REAL');
         if (!o.fase) pr.push('sin fase');
+        else if (!_faseEnLista(o.fase)) pr.push('la fase "' + o.fase + '" no esta en la lista de fases: se graba igual, avisa a Desarrollo');
         if (existen[_norm(o.orden)]) pr.push('el ORDEN ' + o.orden + ' YA EXISTE');
         if (enLote[_norm(o.orden)]) pr.push('ORDEN repetido dentro de este pegado');
         /* Errores de fórmula copiados del Excel (#N/A, #ERROR!...): esa fila no se graba */
@@ -1785,7 +1810,7 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
         var dReg = _soloDia(mv.fecha);
         if (dReg && dReg !== pie) pie += '  \u00b7  anotado el ' + mv.fecha;
         else if (_soloHora(mv.fecha)) pie += ' ' + _soloHora(mv.fecha);
-        if (mv.usuario) pie += '  \u00b7  ' + mv.usuario;
+        if (mv.usuario) pie += '  \u00b7  ' + _conNombre(mv.usuario);
         if (tn === 'COSTURA' && d.costurera) pie += '  \u00b7  cose ' + d.costurera;
         if (tn === 'ENTREGA' && d.auditora)  pie += '  \u00b7  revisa ' + d.auditora;
         if (mv.motivo) pie += '  \u00b7  ' + mv.motivo;
@@ -1816,7 +1841,7 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
           qq = mv.tipo;
           if (mv.antes || mv.despues) qq += ': ' + (mv.antes ? mv.antes + ' \u2192 ' : '') + mv.despues;
         }
-        pie = mv.fecha + (mv.usuario ? '  \u00b7  ' + mv.usuario : '') + (mv.motivo ? '  \u00b7  ' + mv.motivo : '');
+        pie = mv.fecha + (mv.usuario ? '  \u00b7  ' + _conNombre(mv.usuario) : '') + (mv.motivo ? '  \u00b7  ' + mv.motivo : '');
       }
       var tsReg = mv.orden3 || 0, ts;
       if (esCambio || !fEv) ts = tsReg;
@@ -1890,6 +1915,10 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
         if (e.tipo === 'ruta') it.opciones = RUTAS.slice();
         if (e.tipo === 'fase'){
           it.opciones = []; it.frecuentes = 0;
+          if ((DATOS.fasesCat || []).length){
+            it.opciones = _fasesLista();
+            fu.forEach(function(x){ if (x.n >= FASE_FRECUENTE && _faseEnLista(x.fase)) it.frecuentes++; });
+          } else
           fu.forEach(function(x){ it.opciones.push(x.fase); if (x.n >= FASE_FRECUENTE) it.frecuentes++; });
         }
         d.editables.push(it);
@@ -1925,7 +1954,7 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
       d.clientes = []; var vis = {};
       for (var kc in T.siglas){ var sg = T.siglas[kc]; if (vis[sg]) continue; vis[sg] = true; d.clientes.push(T.nombres[kc] || kc); }
       d.clientes.sort(_ordenAlfa);
-      d.personas = T.personas;
+      d.personas = T.personas; d.personasNombre = T.personasNombre || {};
       d.servicios = SERVICIOS.slice(); d.rutas = RUTAS.slice(); d.tallas = TALLAS_SUGERIDAS.slice();
 
       d.acciones = [];
@@ -2479,10 +2508,9 @@ function pintarFormDes(){
         + 'style="background:#F1F6F4;font-weight:bold;color:#0E3B36">'
         + '<div class="hint">Desde Ingenieria la fase es siempre esta. Se entrega al terminar el corte.</div>';
   } else {
-    fas = '<input id="d_fase" list="lFases" placeholder="Prenda Interna, Mock Up..." '
-        + 'oninput="recalcXF()"><datalist id="lFases">';
-    for(var j=0;j<o.fases.length;j++) fas += '<option value="' + esc(o.fases[j]) + '">';
-    fas += '</datalist>';
+    fas = '<select id="d_fase" onchange="recalcXF()"><option value="">-- elige la fase --</option>';
+    for(var j=0;j<o.fases.length;j++) fas += '<option value="' + esc(o.fases[j]) + '">' + esc(o.fases[j]) + '</option>';
+    fas += '</select>';
   }
 
   h += '<div class="par">';
@@ -5540,8 +5568,10 @@ function elegir(cod){
        +     'pon la que cortaste: el requerimiento pasa a esa cantidad y el cambio queda en la ruta.</div></div>'
        + '<div class="campo"><label>'
        +   (AREA === 'corte' ? 'Tu codigo de cortador (obligatorio)' : 'Cortador (opcional)')
-       +   '</label><input id="fQuien" placeholder="codigo del cortador" autocomplete="off"'
-       +   ' style="text-transform:uppercase" oninput="limpiarMarca(\'fQuien\')">'
+       +   '</label><input id="fQuien" list="lCort" placeholder="codigo del cortador" autocomplete="off"'
+       +   ' style="text-transform:uppercase" oninput="limpiarMarca(\'fQuien\');nombreCortador()">'
+       +   '<datalist id="lCort">' + opcionesCortador() + '</datalist>'
+       +   '<div class="hint" id="h_fQuien"></div>'
        +   '<div class="malmsg" id="m_fQuien"></div></div>';
   }
 
@@ -6257,6 +6287,19 @@ function campoPersonas(id, etiqueta, lista, valor, libre, ayuda){
     + '</div>';
 }
 
+/* Cortador: el codigo se sigue guardando; el nombre solo se muestra al lado (26/11/2026) */
+function opcionesCortador(){
+  var lc = ((FICHA && FICHA.personas) || {}).CORTE || [], nm = (FICHA && FICHA.personasNombre) || {}, h = '';
+  for(var i=0;i<lc.length;i++)
+    h += '<option value="' + esc(lc[i]) + '">' + esc(lc[i] + (nm[lc[i]] ? ' \u00b7 ' + nm[lc[i]] : '')) + '</option>';
+  return h;
+}
+function nombreCortador(){
+  var el = document.getElementById('fQuien'), hi = document.getElementById('h_fQuien'); if(!el || !hi) return;
+  var nm = (FICHA && FICHA.personasNombre) || {}, out = [];
+  String(el.value || '').toUpperCase().split(/[\/,;]/).forEach(function(x){ var c = x.trim(); if(c && nm[c]) out.push(c + ' \u00b7 ' + nm[c]); });
+  hi.textContent = out.join('   ');
+}
 function partirPersonas(v){
   var p = String(v === null || v === undefined ? '' : v).split(/[,\/;]/), out = [];
   for(var i=0;i<p.length;i++){
