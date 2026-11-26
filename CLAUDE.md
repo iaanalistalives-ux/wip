@@ -32,6 +32,13 @@ Seguimiento de muestras (protos) de Planta Barranco, por área.
   - `wm_guardar_desarrollo` y `wm_editar` rechazan una fase fuera de la lista (`wm_fase_oficial_`), solo cuando se escribe o se cambia; una orden antigua con otra fase se puede seguir editando. Ingenieria conserva su fase fija. El pegado de Comercial no se rechaza: la pantalla avisa en la revision y se graba igual.
   - En `index.html` la fase del Requerimiento de Desarrollo es una lista (antes texto libre) y Editar usa la misma lista.
   - Cortadores: `wm_personas.nombre_completo` (9714 JORGE BERNABE, A330 ROBERT GUTIERREZ, A823 JHONNY MACHACA); `wm_datos` lo entrega en `personasNombre`. Se sigue guardando el codigo; el nombre solo se muestra al lado (campo del corte y ruta de la ficha).
+- Elegir, no escribir, fases 1 y 2 (26/11/2026, registros `Ds01` y `Wm23`):
+  - Maestras: `wm_fases` es la lista unica de fases para el WIP y Contramuestras (`en_wip`, `en_contramuestras`); `wm_servicios` (SRV-00 «NO» = no lleva servicio), `wm_rutas`, `wm_estados`; `des_personal` es el personal de Desarrollo (codigo = usuario de Sistemas, codigo de trabajador en cortadores, PER- en costureras).
+  - `wm_ordenes` guarda el codigo al lado de cada nombre (`fase_cod`, `servicio_cod`, `ruta_cod`, `status_cod`, `analista_cod`, `ejecutiva_cod`); los llena el disparador `tg_des_cods`.
+  - Servicio: «NO» significa que Desarrollo confirmo que no lleva servicio; vacio significa que falta confirmar. No son lo mismo.
+  - `wm_datos` entrega `analistas`, `serviciosCat` y `rutasCat`. En `index.html` se eligen de lista: quien lo pide y cliente (Requerimiento de Desarrollo), cliente y talla (Editar), talla y ruta (corte), servicio (enviar a servicio). Si una lista llega vacia, la casilla vuelve a su forma anterior.
+  - La base rechaza: quien lo pide fuera de `des_personal` (pasa el nombre propio del usuario con sesion; Ingenieria no se valida), cliente fuera de la lista (ya no cae en VARIOS), servicio fuera de `wm_servicios`, y costureras, auditoras o cortador que no esten en `wm_personas`. Nadie crea personas desde el formulario: las altas se piden a Christian (Catalogos).
+  - Siguen escribiendose: partida, color del corte, grupo, estilo, codigo de tela cuando el estilo no tiene OP, y el pegado de Comercial.
 - No usa Storage ni lee tablas directo.
 
 ## Quién la usa
