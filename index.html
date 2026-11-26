@@ -1446,7 +1446,7 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
     { campo:'RUTA DE PRENDA',     etiqueta:'Ruta',                      tipo:'ruta',    dato:'rutaPrenda' },
     { campo:'COMBO',              etiqueta:'Combo / color',             tipo:'texto',   dato:'combo' },
     { campo:'CANTIDAD REQUERIDA', etiqueta:'Cantidad',                  tipo:'numero',  dato:'cant' },
-    { campo:'TALLA',              etiqueta:'Talla',                     tipo:'texto',   dato:'talla' },
+    { campo:'TALLA',              etiqueta:'Talla',                     tipo:'talla',   dato:'talla' },
     { campo:'OBSERVACION',        etiqueta:'Observacion',               tipo:'texto',   dato:'obs' }
   ];
   var COLS_PEGADO = ['Proto','Usuario','Fecha Solcitud Comercial','Cliente','Temporada',
@@ -1672,7 +1672,7 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
                    combo:_txt(f.combo), cant:_txt(f.cant), talla:_txt(f.talla), status:_txt(f.status), xf:_txt(f.xf), propuesto:prop });
       }
       out.sort(function(a, b){ return Number(b.orden) - Number(a.orden); });
-      return { ok:true, filas:out, servicios:SERVICIOS };
+      return { ok:true, filas:out, servicios:_serviciosLista() };
     });
   }
 
@@ -1695,6 +1695,14 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
     for (var i = 0; i < cat.length; i++) if (_norm(cat[i]) === k) return true;
     return false;
   }
+  /* Listas cerradas de servicios y rutas (catalogos de la base). Si la base todavia
+     no las entrega, se usan las listas fijas de siempre. */
+  function _serviciosLista(){
+    return (DATOS && DATOS.serviciosCat && DATOS.serviciosCat.length) ? DATOS.serviciosCat.slice() : SERVICIOS.slice();
+  }
+  function _rutasLista(){
+    return (DATOS && DATOS.rutasCat && DATOS.rutasCat.length) ? DATOS.rutasCat.slice() : RUTAS.slice();
+  }
   /* Cortador con su nombre al lado del codigo: 9714 -> 9714 \u00b7 JORGE BERNABE. Se sigue guardando el codigo. */
   function _conNombre(u){
     var m = DATOS.personasNombre || {}, t = String(u || '');
@@ -1709,7 +1717,7 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
         clientes.push({ nombre:T.nombres[k] || k, sigla:sg });
       }
       clientes.sort(function(a, b){ return _ordenAlfa(a.nombre, b.nombre); });
-      return { ok:true, clientes:clientes, fases:_fasesLista(),
+      return { ok:true, clientes:clientes, fases:_fasesLista(), analistas:(DATOS.analistas||[]).slice(),
                tallas:TALLAS_SUGERIDAS, proximoOrden:_proximoOrden(), hoy:_hoyIso() };
     });
   }
@@ -1912,7 +1920,8 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
         if (e.tipo === 'avios'){ if (d.aviosReal) return; d.editables.push({ campo:e.campo, etiqueta:e.etiqueta, tipo:e.tipo, valor:d.aviosProy }); return; }
         if (e.tipo === 'tela'){ if (d.telaReal) return; d.editables.push({ campo:e.campo, etiqueta:e.etiqueta, tipo:e.tipo, valor:d.telaProy }); return; }
         var it = { campo:e.campo, etiqueta:e.etiqueta, tipo:e.tipo, valor:_txt(f[e.dato]) };
-        if (e.tipo === 'ruta') it.opciones = RUTAS.slice();
+        if (e.tipo === 'ruta') it.opciones = _rutasLista();
+        if (e.tipo === 'talla') it.opciones = TALLAS_SUGERIDAS.slice();
         if (e.tipo === 'fase'){
           it.opciones = []; it.frecuentes = 0;
           if ((DATOS.fasesCat || []).length){
@@ -1955,7 +1964,7 @@ html[data-tema="oscuro"] #btnAtras{background:#112A25!important;color:#3CC495!im
       for (var kc in T.siglas){ var sg = T.siglas[kc]; if (vis[sg]) continue; vis[sg] = true; d.clientes.push(T.nombres[kc] || kc); }
       d.clientes.sort(_ordenAlfa);
       d.personas = T.personas; d.personasNombre = T.personasNombre || {};
-      d.servicios = SERVICIOS.slice(); d.rutas = RUTAS.slice(); d.tallas = TALLAS_SUGERIDAS.slice();
+      d.servicios = _serviciosLista(); d.rutas = _rutasLista(); d.tallas = TALLAS_SUGERIDAS.slice();
 
       d.acciones = [];
       ACCIONES.forEach(function(A){
@@ -2489,17 +2498,38 @@ function pintarFormDes(){
   var h = '<div class="form">';
 
   h += '<div class="par">';
-  h +=   campo('Quien lo pide', '<input id="d_pide" value="' + esc(usuario) + '" placeholder="nombre o iniciales">');
+  /* Quien lo pide: se elige de la lista de analistas. Si la base todavia no la
+     entrega, queda la casilla de texto de siempre. Quien no esta en la lista
+     (pasa en Ingenieria) queda como opcion elegida, para que pueda guardar. */
+  var an = o.analistas || [], pid;
+  if(an.length){
+    var estaPide = false, uN = norm(usuario);
+    pid = '<select id="d_pide"><option value="">-- elige quien lo pide --</option>';
+    for(var a=0;a<an.length;a++){
+      var esYo = (!estaPide && uN && norm(an[a]) === uN);
+      if(esYo) estaPide = true;
+      pid += '<option value="' + esc(an[a]) + '"' + (esYo ? ' selected' : '') + '>' + esc(an[a]) + '</option>';
+    }
+    if(!estaPide && uN) pid += '<option value="' + esc(usuario) + '" selected>' + esc(usuario) + '</option>';
+    pid += '</select>';
+  } else {
+    pid = '<input id="d_pide" value="' + esc(usuario) + '" placeholder="nombre o iniciales">';
+  }
+  h +=   campo('Quien lo pide', pid);
   h +=   campo('Fecha del pedido', '<input type="date" id="d_fecha" value="' + esc(o.hoy) + '">');
   h += '</div>';
 
-  var cli = '<input id="d_cliente" list="lClientes" placeholder="Escribe o elige el cliente">'
-          + '<datalist id="lClientes">';
-  for(var i=0;i<o.clientes.length;i++){
-    cli += '<option value="' + esc(o.clientes[i].nombre) + '">'
-         + esc(o.clientes[i].sigla) + '</option>';
+  var cli;
+  if(o.clientes.length){
+    cli = '<select id="d_cliente"><option value="">-- elige el cliente --</option>';
+    for(var i=0;i<o.clientes.length;i++){
+      cli += '<option value="' + esc(o.clientes[i].nombre) + '">'
+           + esc(o.clientes[i].nombre) + '</option>';
+    }
+    cli += '</select>';
+  } else {
+    cli = '<input id="d_cliente" placeholder="Escribe el cliente">';    // sin lista de clientes: como antes
   }
-  cli += '</datalist>';
 
   var fas;
   if(AREA === 'ingenieria'){
@@ -5463,12 +5493,21 @@ function elegir(cod){
   }
 
   if(cod === 'SERVICIO'){
-    var sv = FICHA.servicios || [], op = '';
-    for(var q=0;q<sv.length;q++) op += '<option value="' + esc(sv[q]) + '">';
+    /* Lista cerrada. El servicio que ya tiene el estilo queda elegido; si esta
+       escrito distinto a la lista, se conserva tal cual como opcion elegida. */
+    var sv = FICHA.servicios || [], op = '', svHoy = FICHA.servicio || '', svEsta = false;
+    for(var q=0;q<sv.length;q++){
+      var svSel = (!svEsta && svHoy && norm(sv[q]) === norm(svHoy));
+      if(svSel) svEsta = true;
+      op += '<option value="' + esc(sv[q]) + '"' + (svSel ? ' selected' : '') + '>' + esc(sv[q]) + '</option>';
+    }
+    if(!svEsta && svHoy) op = '<option value="' + esc(svHoy) + '" selected>' + esc(svHoy) + '  (el de hoy)</option>' + op;
     h = '<div class="campo"><label>Que servicio</label>'
-      + '<input id="vReg" list="lServ" value="' + esc(FICHA.servicio || '') + '"'
-      + ' placeholder="bordado, estampado, tenido, costura..."'
-      + ' autocomplete="off"><datalist id="lServ">' + op + '</datalist></div>'
+      + (sv.length
+          ? '<select id="vReg"><option value="">-- elige el servicio --</option>' + op + '</select></div>'
+          : '<input id="vReg" value="' + esc(svHoy) + '"'
+            + ' placeholder="bordado, estampado, tenido, costura..."'
+            + ' autocomplete="off"></div>')
        + '<div class="hint">El estilo pasa a <b>X SERVICIO</b> y los registros de avance '
        + 'quedan bloqueados hasta que vuelva. Sigue apareciendo en el programa y sigue '
        + 'contando en el total: es una prenda viva, solo que esta en un taller.</div>';
@@ -5539,7 +5578,16 @@ function elegir(cod){
      nombre de quien esta en la pantalla. */
   if(cod === 'CORTE'){
     var tl = '', ts = FICHA.tallas || [];
-    for(var q=0;q<ts.length;q++) tl += '<option value="' + esc(ts[q]) + '">';
+    var tHoy = FICHA.talla || '', tEsta = false;
+    for(var q=0;q<ts.length;q++){
+      if(ts[q] === tHoy) tEsta = true;
+      tl += '<option value="' + esc(ts[q]) + '"' + (ts[q] === tHoy ? ' selected' : '') + '>' + esc(ts[q]) + '</option>';
+    }
+    // la talla de hoy se conserva elegida aunque no este en la lista
+    if(!tEsta && tHoy) tl = '<option value="' + esc(tHoy) + '" selected>' + esc(tHoy) + '</option>' + tl;
+    var rt = '', rs = FICHA.rutas || [];
+    for(var q2=0;q2<rs.length;q2++)
+      rt += '<option value="' + esc(rs[q2]) + '"' + (FICHA.rutaPrenda===rs[q2] ? ' selected' : '') + '>' + esc(rs[q2]) + '</option>';
     var cn = '';
     for(var w=1;w<=20;w++) cn += '<option value="' + w + '">';
 
@@ -5552,14 +5600,15 @@ function elegir(cod){
        +     'Sin partida no se puede registrar el corte.</div></div>'
        + '<div class="campo"><label>Ruta</label><select id="fRuta">'
        +   '<option value="">-- elige la ruta --</option>'
-       +   '<option value="Lavado"'  + (FICHA.rutaPrenda==='Lavado' ?' selected':'') + '>Lavado</option>'
-       +   '<option value="Acabado"' + (FICHA.rutaPrenda==='Acabado'?' selected':'') + '>Acabado</option>'
+       +   rt
        + '</select></div>'
        + '<div class="campo"><label>Color</label>'
        +   '<input id="fColor" value="' + esc(FICHA.combo) + '" autocomplete="off"></div>'
        + '<div class="campo"><label>Talla</label>'
-       +   '<input id="fTalla" list="lTallasF" value="' + esc(FICHA.talla) + '" autocomplete="off">'
-       +   '<datalist id="lTallasF">' + tl + '</datalist></div>'
+       +   (ts.length
+             ? '<select id="fTalla"><option value="">-- elige la talla --</option>' + tl + '</select>'
+             : '<input id="fTalla" value="' + esc(tHoy) + '" autocomplete="off">')
+       +   '</div>'
        + '<div class="campo"><label>Cantidad</label>'
        +   '<input id="fCant" list="lCantF" value="' + esc(FICHA.cant) + '" autocomplete="off">'
        +   '<datalist id="lCantF">' + cn + '</datalist>'
@@ -5577,12 +5626,12 @@ function elegir(cod){
 
   if(cod === 'ENTREGA'){
     h += campoPersonas('fAudi', 'Auditoras', (FICHA.personas || {}).INSPECCION || [],
-           FICHA.auditora || '', !AREA, textoPersonas('inspeccion'));
+           FICHA.auditora || '', false, textoPersonas('inspeccion'));
   }
 
   if(cod === 'COSTURA'){
     h += campoPersonas('fCost', 'Costureras', (FICHA.personas || {}).COSTURA || [],
-           FICHA.costurera || '', !AREA, textoPersonas('costura'));
+           FICHA.costurera || '', false, textoPersonas('costura'));
   }
 
   // fuera de orden: el aviso va arriba y el motivo es obligatorio
@@ -5617,12 +5666,12 @@ function elegir(cod){
   persPintarTodos();
 }
 
-/* Las areas eligen de la lista cerrada; Desarrollo puede agregar a alguien. */
+/* Todos eligen de la lista cerrada: nadie agrega nombres nuevos desde aca. */
 function textoPersonas(area){
   return AREA
     ? 'Elige de la lista. Pueden ser varias. Si falta alguien, avisa a Desarrollo.'
-    : 'Si no esta en la lista, escribe el nombre y elige "Agregar a ... a la lista". '
-      + 'Queda para todos, tambien para la pantalla de ' + area + '.';
+    : 'Elige de la lista. Pueden ser varias. Si falta alguien, hay que agregarla '
+      + 'a la lista de personas de ' + area + '.';
 }
 
 /* La fecha: las areas la escriben dia/mes/año, Desarrollo usa el campo del
@@ -5801,7 +5850,7 @@ function guardarReg(btn){
       /* el codigo tiene que estar en la base de datos de cortadores (tabla de
          personas de ERORRES, AREA = CORTE). Pueden ser varios: 9714/A330.
          Mientras la lista este vacia, se acepta cualquiera, como antes. */
-      if(AREA === 'corte' && quienCorte){
+      if(quienCorte){     // se valida siempre que se escribio algo, tambien desde Desarrollo
         var lc = ((FICHA && FICHA.personas) || {}).CORTE || [];
         if(lc.length){
           var malos = partirPersonas(quienCorte).filter(function(x){ return persIndice(lc, x) < 0; });
@@ -5866,18 +5915,38 @@ function panelEditar(){
          + '<div class="hint">Cambiarlo aqui solo afecta al WIP: en <b>BASE</b> ese '
          + 'requerimiento va a seguir con el estilo que puso comercial.</div>';
     } else if(e.tipo==='cliente'){
-      h += '<input id="e_' + i + '" list="lCli" value="' + esc(v) + '" '
-         + 'placeholder="nombre del cliente">'
-         + '<datalist id="lCli">';
+      /* Lista cerrada de clientes. Si el de hoy esta escrito distinto a la
+         lista, se muestra tal cual y queda elegido: sin tocarlo, no cambia nada. */
       var cl = d.clientes || [];
-      for(var q=0;q<cl.length;q++) h += '<option value="' + esc(cl[q]) + '">';
-      h += '</datalist>'
-         + '<div class="hint">Se guarda escrito igual que en la tabla de clientes '
-         + '(THEORY, Straight Down...); si no esta ahi, en mayusculas.<br>'
-         + 'Cambiarlo aqui solo afecta al WIP: en <b>BASE</b> '
+      if(cl.length){
+        var clEsta = false;
+        for(var q0=0;q0<cl.length;q0++) if(cl[q0] === e.valor) clEsta = true;
+        h += '<select id="e_' + i + '">';
+        if(!clEsta) h += '<option value="' + esc(e.valor) + '" selected>'
+                       + esc(e.valor || '-- sin cliente --') + '  (la de hoy)</option>';
+        for(var q=0;q<cl.length;q++)
+          h += '<option value="' + esc(cl[q]) + '"' + (cl[q] === e.valor ? ' selected' : '') + '>' + esc(cl[q]) + '</option>';
+        h += '</select>';
+      } else {
+        h += '<input id="e_' + i + '" value="' + esc(v) + '" placeholder="nombre del cliente">';
+      }
+      h += '<div class="hint">Cambiarlo aqui solo afecta al WIP: en <b>BASE</b> '
          + 'ese estilo va a seguir con el cliente anterior.<br>'
-         + 'Si es un cliente nuevo, pide que lo agreguen a la tabla de clientes, '
-         + 'o los proximos ingresos van a volver a salir con grupo VARIOS.</div>';
+         + 'Si el cliente no esta en la lista, pide que lo agreguen a la tabla de clientes.</div>';
+    } else if(e.tipo==='talla'){
+      var to = e.opciones || [];
+      if(to.length){
+        var taEsta = false;
+        for(var t1=0;t1<to.length;t1++) if(to[t1] === e.valor) taEsta = true;
+        h += '<select id="e_' + i + '">';
+        if(!taEsta) h += '<option value="' + esc(e.valor) + '" selected>'
+                       + esc(e.valor || '-- sin talla --') + '  (la de hoy)</option>';
+        for(var t2=0;t2<to.length;t2++)
+          h += '<option value="' + esc(to[t2]) + '"' + (to[t2] === e.valor ? ' selected' : '') + '>' + esc(to[t2]) + '</option>';
+        h += '</select>';
+      } else {
+        h += '<input id="e_' + i + '" type="text" value="' + esc(v) + '">';
+      }
     } else if(e.tipo==='fase'){
       /* Lista de las fases que ya existen, las mas usadas arriba. Si la fase
          de hoy esta escrita distinto a la de la lista, se muestra tal cual y
@@ -6259,9 +6328,8 @@ function tokenPara(btn, datos){
 /* ---------- selector de personas ----------
    Como el "Para" del correo: se escriben dos letras, sale la lista, se elige
    y el nombre queda como etiqueta. Se pueden poner varias.
-   En costura e inspeccion la lista es cerrada. En la ficha de Desarrollo
-   (libre = true) se puede agregar a alguien que no este: ese nombre entra a
-   la tabla de ERORRES cuando se guarda el registro. */
+   La lista es cerrada para todos, tambien en la ficha de Desarrollo. Solo
+   queda libre (libre = true) cuando no hay lista cargada. */
 var PERSONAS = {};
 
 function campoPersonas(id, etiqueta, lista, valor, libre, ayuda){
